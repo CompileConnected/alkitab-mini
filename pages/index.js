@@ -9,9 +9,9 @@ const Home = () => {
 
   useEffect(() => {
     async function getDate() {
-      const res = await fetch('https://labs.bible.org/api/?passage=John%203:16&type=json');
-      const newDate = await res.json();
-      setDate(newDate);
+      const res = await fetch('https://labs.bible.org/api/?passage=John%203:16&type=json', { mode: 'no-cors' });
+      console.log("response", res)
+      setDate(res[0]);
     }
     getDate();
   }, []);
@@ -32,7 +32,7 @@ const Home = () => {
           The date is:&nbsp;{' '}
           {date ? (
             <span>
-              <b>{date.date}</b>
+              <b>{date}</b>
             </span>
           ) : (
             <span className="loading"></span>

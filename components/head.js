@@ -34,7 +34,7 @@ const Head = props => (
     <meta name="browsermode" content="application" />
 
     {/* <!-- Android  --> */}
-    <meta name="theme-color" content="red" />
+    <meta name="theme-color" content="white" />
     <meta name="mobile-web-app-capable" content="yes" />
 
     {/* <!-- iOS --> */}
@@ -43,8 +43,8 @@ const Head = props => (
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     {/* <!-- Windows  --> */}
-    <meta name="msapplication-navbutton-color" content="red" />
-    <meta name="msapplication-TileColor" content="red" />
+    <meta name="msapplication-navbutton-color" content="white" />
+    <meta name="msapplication-TileColor" content="white" />
     <meta name="msapplication-TileImage" content="ms-icon-144x144.png" />
     <meta name="msapplication-config" content="browserconfig.xml" />
 

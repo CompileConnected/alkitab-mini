@@ -6,9 +6,10 @@ import Nav from '../components/nav';
 const Home = () => {
   const [date, setDate] = useState(null);
 
+
   useEffect(() => {
     async function getDate() {
-      const res = await fetch('/api/date');
+      const res = await fetch('https://labs.bible.org/api/?passage=John%203:16&type=json');
       const newDate = await res.json();
       setDate(newDate);
     }

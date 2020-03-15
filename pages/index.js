@@ -9,9 +9,11 @@ const Home = () => {
 
   useEffect(() => {
     async function getDate() {
-      const res = await fetch('https://labs.bible.org/api/?passage=John%203:16&type=json', { mode: 'no-cors' });
-      console.log("response", res)
-      setDate(res[0]);
+      const res = await fetch('/api/date');
+      // console.log(res);
+      const newDate = await res.json();
+      console.log(newDate);
+      setDate(newDate[0].text);
     }
     getDate();
   }, []);

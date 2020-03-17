@@ -57,7 +57,10 @@ const Head = props => (
 
     <link href="icon-192x192.png" rel="icon" sizes="192x192" />
     <link href="icon-128x128.png" rel="icon" sizes="128x128" />
-
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
     <link href="/manifest.json" rel="manifest" />
   </NextHead>
 );

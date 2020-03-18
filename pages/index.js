@@ -1,66 +1,107 @@
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Head from '../components/head';
-import Nav from '../components/nav';
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+
+const useStyles = makeStyles({
+  root: {
+    background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+    border: 0,
+    borderRadius: 3,
+    maxWidth: 'calc(100% - 32px)',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+    color: 'white',
+    padding: '0 30px',
+  },
+});
 
 const Home = () => {
-  const [date, setDate] = useState(null);
+  const [verse, setVerse] = useState(null);
+  const classes = useStyles();
 
 
   useEffect(() => {
-    async function getDate() {
-      const res = await fetch('/api/date');
-      // console.log(res);
-      const newDate = await res.json();
-      console.log(newDate);
-      setDate(newDate[0].text);
+    async function getVerse() {
+      const res = await fetch('/api/bible?passage=John%203:16&type=json');
+      const newVerse = await res.json();
+      setVerse(newVerse[0].text);
     }
-    getDate();
+    getVerse();
   }, []);
 
   return (
     <div>
       <Head title="Home" />
-      <Nav />
-
       <div className="hero">
-        <h1 className="title">Welcome to Next!</h1>
+        <h1 className="title">Welcome to Alkitab Mini!</h1>
         <p className="description">
-          To get started, edit the <code>pages/index.js</code> or{' '}
-          <code>pages/api/date.js</code> files, then save to reload.
+          this project still on progress.. so you will see some changes
         </p>
 
-        <p className="row date">
-          The date is:&nbsp;{' '}
-          {date ? (
-            <span>
-              <b>{date}</b>
-            </span>
-          ) : (
-            <span className="loading"></span>
-          )}
-        </p>
+        <Paper className={classes.root}>
+          <div className="verses">
+            <div className="verse">
+              {verse}
+            </div>
+          </div>
+        </Paper>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
 
-        <div className="row">
-          <Link href="https://github.com/zeit/next.js#setup">
-            <a className="card">
-              <h3>Getting Started &rarr;</h3>
-              <p>Learn more about Next.js on GitHub and in their examples.</p>
-            </a>
-          </Link>
-          <Link href="https://github.com/zeit/next.js/tree/master/examples">
-            <a className="card">
-              <h3>Examples &rarr;</h3>
-              <p>Find other example boilerplates on the Next.js GitHub.</p>
-            </a>
-          </Link>
-          <Link href="https://github.com/zeit/next.js">
-            <a className="card">
-              <h3>Create Next App &rarr;</h3>
-              <p>Was this tool helpful? Let us know how we can improve it!</p>
-            </a>
-          </Link>
-        </div>
+        <p className="description">
+          <h2><b>Capablities</b></h2>
+          <br /> 1. instalable -> it's means that you can install to your android or ios
+          <br /> 2. Small and fast
+        </p>
+        <p className="description">
+          <h2><b>Road map and features it will be here</b></h2>
+          <br />1. verses and author
+          <br />2. search verse
+          <br />3. polishing ui
+          <br />4. dark mode
+          <br />5. fullscreen verse
+          <br />6. offline verse or bible
+          <br />7. verse of the day
+          <br />8. other bible language
+          <br />9. shareable verse
+          <br />10. text to speech 
+        </p>
+        <p className="description">
+          This project is develop by one person only, myself
+          <br /> some feature will be slow release because day by day im working 
+          <br /> why am i doing this, when there's so many people already develop this kinda like
+          <br /> Alkitab it's mean Bible in english
+          <br /> Alkitab is how in Bahasa Indonesia say it
+          <br /> the true purpose i make this is to make every people in Indonesia
+          <br /> is able to access Alkitab in such low internet with some good ui
+          <br /> people may debate this good ui is not necessary
+          <br /> some people may say don't need all this features
+          <br /> I would say i agree
+          <br /> But that's all other bible website do, the job is done.
+          <br /> What I want is to use all of capablities and features that web has provided
+          <br /> in very very cheap data usage, just to spread bible verse
+        </p>
+        {/* <p className="description">
+          back to the start, bible i provided is in english
+          <br />if someone able provided me Alkitab terjemahan baru in json/csv/(free)api not in pdf or documents 
+          <br /> please contact me @yokho95@gmail.com
+        </p> */}
       </div>
 
       <style jsx>{`
@@ -86,57 +127,29 @@ const Home = () => {
           flex-direction: row;
           justify-content: space-around;
         }
-        .date {
-          height: 24px;
+        .verse {
           max-width: calc(100% - 32px)
-          text-align: center;
+          text-align: left;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 0 16px;
-        }
-        .date p {
           text-align: center;
+          font-size:24px;
         }
-        .date span {
-          width: 176px;
-          text-align: center;
+        @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+          .verses {
+            width:80%;
+            padding:0px;
+          }
         }
-        @keyframes Loading {
-          0%{background-position:0% 50%}
-          50%{background-position:100% 50%}
-          100%{background-position:0% 50%}
-        }
-        .date .loading {
-          max-width: 100%;
-          height: 24px;
-          border-radius: 4px;
-          display: inline-block;
-          background: linear-gradient(270deg, #D1D1D1, #EAEAEA);
-          background-size: 200% 200%;
-          animation: Loading 2s ease infinite;
-        }
-        .card {
-          padding: 18px 18px 24px;
-          width: 220px;
-          text-align: left;
-          text-decoration: none;
-          color: #434343;
-          border: 1px solid #9b9b9b;
-        }
-        .card:hover {
-          border-color: #067df7;
-        }
-        .card h3 {
-          margin: 0;
-          color: #067df7;
-          font-size: 18px;
-        }
-        .card p {
-          margin: 0;
-          padding: 12px 0 0;
-          font-size: 13px;
-          color: #333;
+        .verses{
+          background-color:#1a9ee6;
+          width:50%;
+          margin-left:auto;
+          margin-right:auto;
+          background:transparent;
+          padding:20px;
         }
       `}</style>
     </div>

@@ -1,16 +1,8 @@
 {
     "version": 2,
-    "routes": [
+    "headers": [
         {
-            "src": "^/service-worker.js$",
-            "dest": "/_next/static/service-worker.js",
-            "headers": {
-                "cache-control": "public, max-age=43200, immutable",
-                "Service-Worker-Allowed": "/"
-            }
-        },
-        {
-            "src": "/(.*)",
+            "source": "/(.*)",
             "headers" : [
                 {
                     "key" : "X-Content-Type-Options",
@@ -25,6 +17,16 @@
                     "value" : "1; mode=block"
                 }
             ]
+        }
+    ],
+    "routes": [
+        {
+            "src": "^/service-worker.js$",
+            "dest": "/_next/static/service-worker.js",
+            "headers": {
+                "cache-control": "public, max-age=43200, immutable",
+                "Service-Worker-Allowed": "/"
+            }
         }
     ],
     "builds": [

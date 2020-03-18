@@ -1,25 +1,17 @@
 {
     "version": 2,
-    "headers": [
-        {
-            "src": "/(.*)",
-            "headers" : [
-                {
-                    "key" : "X-Content-Type-Options",
-                    "value" : "nosniff"
-                },
-                {
-                    "key" : "X-Frame-Options",
-                    "value" : "DENY"
-                },
-                {
-                    "key" : "X-XSS-Protection",
-                    "value" : "1; mode=block"
-                }
-            ]
-        }
-    ],
     "routes": [
+        {
+            "src": "/.*",
+            "headers": {
+                "Content-Security-Policy": "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self';",
+                "X-Frame-Options": "DENY",
+                "X-XSS-Protection": "1; mode=block",
+                "X-Content-Type-Options": "nosniff",
+                "Referrer-Policy": "no-referrer",
+                "Feature-Policy": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; encrypted-media 'none'; fullscreen 'self'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none';  picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; vr 'none';"
+            }
+        },
         {
             "src": "^/service-worker.js$",
             "dest": "/_next/static/service-worker.js",

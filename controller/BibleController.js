@@ -15,12 +15,13 @@ export function handler (req, res) {
             const keys = Object.keys(req.query);
             for (let key of keys) {
                 console.log(key)
-                queryParam += encodeURIComponent(`&${key}=${req.query[key]}`);
+                queryParam += `&${key}=${req.query[key]}`;
             }
             queryParam = "?"+queryParam.substring(1);
         }
-        console.log(queryParam);
-        fetch(url+queryParam, { mode: 'no-cors' }).then((x) => x.json())
+        fetch(url+queryParam, { mode: 'no-cors' }).then((x) => {
+            return x.json()
+        })
         .then((response) => {
             res.json(response);
             return;

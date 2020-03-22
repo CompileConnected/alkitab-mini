@@ -9,6 +9,16 @@ const nextConfig = {
     workboxOpts: {
         swDest: 'static/service-worker.js',
         runtimeCaching: [
+			{
+				urlPattern: /[.](png|jpg|ico|css)/,
+				handler: 'CacheFirst',
+				options: {
+					cacheName: 'assets-cache',
+					cacheableResponse: {
+						statuses: [0, 200]
+					}
+				}
+			},
             {
                 urlPattern: /^https?.*/,
                 handler: 'NetworkFirst',

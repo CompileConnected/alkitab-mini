@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import App from 'next/app';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';

@@ -3,6 +3,10 @@
 # dependencies
 /node_modules
 
+#generated
+/public/sw.*
+/public/workbox-*.*
+
 # testing
 /coverage
 

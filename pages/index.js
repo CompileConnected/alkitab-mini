@@ -1,14 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import Head from '../components/head';
-import { VerseCard } from '../components/VerseCard';
-import { SearchForm } from '../components/SearchForm';
+import Head from '../src/components/Head';
+import { VerseCard } from '../src/components/VerseCard';
+import { SearchForm } from '../src/components/SearchForm';
 import { useBible } from '../src/hooks/useBible';
 import { useSpeech } from '../src/hooks/useSpeech';
+import { useSettingsStore } from '../src/stores/settingsStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 
 const VerseAnimation = dynamic(
-  () => import('../components/VerseAnimation').then(m => m.VerseAnimation),
+  () => import('../src/components/VerseAnimation').then(m => m.VerseAnimation),
   { ssr: false }
 );
 
@@ -19,6 +22,7 @@ export default function Home() {
   const [copied,       setCopied]       = useState(false);
   const [isSearched,   setIsSearched]   = useState(false);
   const { speaking, speak, stop } = useSpeech();
+  const openSettings = useSettingsStore(s => s.setSettingsOpen);
 
   const handleCopy = useCallback(() => {
     if (!verse) return;
@@ -31,7 +35,7 @@ export default function Home() {
   const handleSpeak = useCallback(() => {
     if (speaking) { stop(); return; }
     const text = verses.length > 1
-      ? verses.map(({ verse: num, text }) => `${num}. ${text}`).join(' ')
+      ? verses.map(({ verse: num, text }) => `${num}. ${text}`)
       : verse;
     speak(text, reference);
   }, [speaking, speak, stop, verse, verses, reference]);
@@ -61,11 +65,20 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center px-4 py-6 sm:py-10 gap-5 sm:gap-8 max-w-2xl mx-auto pb-28 sm:pb-10">
 
         {/* ── Header ── */}
-        <header className="w-full flex flex-col items-center gap-2 animate-fade-up">
-          <h1 className="text-black text-3xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Alkitab Mini
-          </h1>
-          <p className="text-black/40 text-sm tracking-widest uppercase">Verse of the Day</p>
+        <header className="w-full flex items-center justify-between animate-fade-up">
+          <div className="flex flex-col items-start gap-1">
+            <h1 className="text-black text-3xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Alkitab Mini
+            </h1>
+            <p className="text-black/40 text-sm tracking-widest uppercase">Verse of the Day</p>
+          </div>
+          <button
+            onClick={() => openSettings(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+            aria-label="Open settings"
+          >
+            <FontAwesomeIcon icon={faGear} className="text-gray-500 w-4 h-4" />
+          </button>
         </header>
 
         {/* ── Verse Animation ── */}

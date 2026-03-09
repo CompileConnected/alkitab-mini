@@ -1,3 +1,4 @@
-import { handler } from '../../controller/BibleController';
+import { handler } from '../../src/controller/BibleController';
 
 export default handler;
+

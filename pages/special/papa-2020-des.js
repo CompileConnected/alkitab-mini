@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import Head from "../../components/head";
-import { Teleprompter } from "../../components/Teleprompter";
+import Head from "../../src/components/Head";
+import { Teleprompter } from "../../src/components/Teleprompter";
 
 const slides = [
   { id: "cover",   title: null },

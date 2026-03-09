@@ -13,16 +13,23 @@
     "analyze": "ANALYZE=true yarn build --webpack"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.2.0",
+    "@huggingface/transformers": "^3.8.1",
     "@tailwindcss/postcss": "^4.2.1",
     "animejs": "^4.3.6",
     "autoprefixer": "^10.4.27",
+    "kokoro-js": "^1.2.1",
     "next": "latest",
     "postcss": "^8.5.8",
     "react": "latest",
     "react-dom": "latest",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.1.6"
+    "@next/bundle-analyzer": "^16.1.6",
+    "path-browserify": "^1.0.1"
   }
 }

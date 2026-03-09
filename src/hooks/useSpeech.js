@@ -1,16 +1,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useSettingsStore } from '../stores/settingsStore';
+import { useKokoroStore }   from '../stores/kokoroStore';
+import { useKokoro }        from '../context/KokoroContext';
 
 /**
- * useSpeech — thin wrapper around the Web Speech API.
+ * useSpeech — unified TTS hook supporting native Web Speech API and Kokoro AI.
+ * Engine is controlled via useSettingsStore (Zustand).
  *
  * Returns { speaking, speak, stop }
- *   speak(text, label?) — reads `text` followed by an optional `label` (e.g. reference).
- *   stop()              — cancels any ongoing utterance.
- *   speaking            — true while the browser is reading.
  */
-export function useSpeech({ lang = 'en-US', rate = 0.88, pitch = 0.95 } = {}) {
-  const [speaking, setSpeaking] = useState(false);
-  const voicesRef = useRef([]);
+export function useSpeech({ lang = 'en-US', pitch = 0.95 } = {}) {
+  const ttsEngine              = useSettingsStore(s => s.ttsEngine);
+  const ttsSpeed               = useSettingsStore(s => s.ttsSpeed);
+  const kokoroSpeaking         = useKokoroStore(s => s.speaking);
+  const [nativeSpeaking, setNativeSpeaking] = useState(false);
+  const kokoro                              = useKokoro();
+  const voicesRef                           = useRef([]);
 
   // Voices load asynchronously in most browsers
   useEffect(() => {
@@ -20,45 +25,52 @@ export function useSpeech({ lang = 'en-US', rate = 0.88, pitch = 0.95 } = {}) {
     return () => window.speechSynthesis.removeEventListener('voiceschanged', load);
   }, []);
 
-  const stop = useCallback(() => {
+  const stopNative = useCallback(() => {
     window.speechSynthesis.cancel();
-    setSpeaking(false);
+    setNativeSpeaking(false);
   }, []);
 
-  const speak = useCallback((text, label = '') => {
+  const speakNative = useCallback((text, label = '') => {
     if (!text) return;
 
-    window.speechSynthesis.cancel(); // clear any previous
+    window.speechSynthesis.cancel();
 
     const fullText = label ? `${text}. — ${label}` : text;
     const utt = new SpeechSynthesisUtterance(fullText);
     utt.lang  = lang;
-    utt.rate  = rate;
+    utt.rate  = (ttsSpeed ?? 1) * 0.88; // scale: 1× = natural 0.88 rate
     utt.pitch = pitch;
 
     // Pick the most natural voice available
     const voices = voicesRef.current;
     const voice =
-      // 1. Google Natural voices (Chrome)
       voices.find(v => /google.*natural/i.test(v.name) && v.lang.startsWith('en')) ??
-      // 2. Any Google en-US
       voices.find(v => /google/i.test(v.name) && v.lang === 'en-US') ??
-      // 3. Samantha / Alex (macOS)
       voices.find(v => /samantha|alex/i.test(v.name)) ??
-      // 4. Any en-US
       voices.find(v => v.lang === 'en-US') ??
-      // 5. Any English
       voices.find(v => v.lang.startsWith('en')) ??
       null;
 
     if (voice) utt.voice = voice;
 
-    utt.onend   = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
+    utt.onend   = () => setNativeSpeaking(false);
+    utt.onerror = () => setNativeSpeaking(false);
 
-    setSpeaking(true);
+    setNativeSpeaking(true);
     window.speechSynthesis.speak(utt);
-  }, [lang, rate, pitch]);
+  }, [lang, pitch, ttsSpeed]);
+
+  const speak = useCallback((text, label = '') => {
+    if (ttsEngine === 'kokoro') return kokoro.speak(text, ttsSpeed ?? 1);
+    speakNative(text, label);
+  }, [ttsEngine, ttsSpeed, kokoro, speakNative]);
+
+  const stop = useCallback(() => {
+    if (ttsEngine === 'kokoro') return kokoro.stop();
+    stopNative();
+  }, [ttsEngine, kokoro, stopNative]);
+
+  const speaking = ttsEngine === 'kokoro' ? kokoroSpeaking : nativeSpeaking;
 
   return { speaking, speak, stop };
 }

@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 export function SearchForm({ input, onChange, onSubmit, loading }) {
   return (
@@ -18,7 +20,7 @@ export function SearchForm({ input, onChange, onSubmit, loading }) {
         disabled={loading}
         className="px-5 py-3 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-black font-bold text-sm hover:from-amber-300 hover:to-amber-400 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        →
+        <FontAwesomeIcon icon={faArrowRight} />
       </button>
     </form>
   );

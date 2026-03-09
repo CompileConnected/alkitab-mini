@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from '../components/head';
-import { Teleprompter } from '../components/Teleprompter';
+import Head from '../src/components/Head';
+import { Teleprompter } from '../src/components/Teleprompter';
 import { useBible } from '../src/hooks/useBible';
 import { useSpeech } from '../src/hooks/useSpeech';
 
@@ -32,7 +32,10 @@ export default function PresentPage() {
     speak(text, reference);
   };
 
-  const handleClose = () => router.push('/');
+  const handleClose = () => {
+    stop();
+    router.push('/');
+  };
 
   return (
     <>

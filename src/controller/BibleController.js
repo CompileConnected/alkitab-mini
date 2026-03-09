@@ -6,7 +6,7 @@
  * No business logic or API-fetching lives here.
  */
 
-import { getVerse, getVerseOfTheDay, getRandomVerse } from '../src/services/BibleService';
+import { getVerse, getVerseOfTheDay, getRandomVerse } from '../services/BibleService';
 
 /**
  * In-memory LRU-style cache for upstream Bible API responses.

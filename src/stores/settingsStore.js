@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { withDevtools } from './withDevtools';
 
 /**
  * Centralised user-preference store.
@@ -7,7 +8,8 @@ import { persist } from 'zustand/middleware';
  * `partialize` excludes transient UI state (settingsOpen) from storage.
  */
 export const useSettingsStore = create(
-  persist(
+  withDevtools(
+    persist(
     (set) => ({
       // Persisted preferences
       ttsEngine:   'native',  // 'native' | 'kokoro'
@@ -24,6 +26,7 @@ export const useSettingsStore = create(
     }),
     {
       name:        'alkitab-settings',
+      version:     2,
       // Only persist user preferences, not modal open state
       partialize:  (s) => ({
         ttsEngine:  s.ttsEngine,
@@ -31,6 +34,13 @@ export const useSettingsStore = create(
         fontSize:   s.fontSize,
         fontFamily: s.fontFamily,
       }),
+      // v0→v1→v2: reset ttsEngine to 'native' (default)
+      migrate: (stored) => ({
+        ...stored,
+        ttsEngine: 'native',
+      }),
     },
+    ),
+    { name: 'SettingsStore', store: 'AlkitabMini' },
   ),
 );

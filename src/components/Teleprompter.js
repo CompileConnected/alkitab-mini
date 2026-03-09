@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAITranslation, LANGUAGES } from '../hooks/useAITranslation';
+import { useTeleprompterStore, SIZE_STEPS } from '../stores/teleprompterStore';
+import { TeleprompterTranslationSection } from './TranslationSection';
+import { SpeakButton } from './SpeakButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBookOpen, faVolumeHigh, faStop, faGlobe,
-  faSpinner, faXmark, faTriangleExclamation,
+  faBookOpen, faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-
-const SIZE_STEPS = [18, 22, 28, 36, 44, 54, 64];
-const DEFAULT_IDX = 2;
 
 /**
  * Teleprompter
@@ -22,26 +20,23 @@ const DEFAULT_IDX = 2;
  *  bg           — CSS background value
  *  theme        — 'dark' (default) | 'light'
  *  backdrop     — JSX rendered behind content (blobs / gradients)
- *  versesPerPage — how many verses per page in verse mode (default 5)
  *  onClose      — called on ✕ Exit or Escape
  */
 export function Teleprompter({
   // verse mode
   verse, verses = [], reference, speaking, onSpeak,
-  versesPerPage = 5,
   // slide navigation (slide mode)
   children, onPrev, onNext, slideIndex, slideTotal,
   // shell
   onClose, bg, theme = 'dark', backdrop,
 }) {
-  const [sizeIdx, setSizeIdx] = useState(DEFAULT_IDX);
-  const [page, setPage]       = useState(0);
-  const [vpp, setVpp]         = useState(versesPerPage);
-
-  const vppDown = useCallback(() => setVpp(v => Math.max(1, v - 1)), []);
-  const vppUp   = useCallback(() => setVpp(v => Math.min(20, v + 1)), []);
-  const { translation, loading: aiLoading, error: aiError, targetLang, setTargetLang, translate, clear } = useAITranslation();
-  const [showTranslate, setShowTranslate] = useState(false);
+  const sizeIdx  = useTeleprompterStore(s => s.sizeIdx);
+  const bigger   = useTeleprompterStore(s => s.bigger);
+  const smaller  = useTeleprompterStore(s => s.smaller);
+  const vpp      = useTeleprompterStore(s => s.vpp);
+  const vppUp    = useTeleprompterStore(s => s.vppUp);
+  const vppDown  = useTeleprompterStore(s => s.vppDown);
+  const [page, setPage] = useState(0);
 
   const isSlideMode = Boolean(children);
   const hasNav      = Boolean(onPrev || onNext);
@@ -68,22 +63,41 @@ export function Teleprompter({
     return verse ?? '';
   }, [verses, currentPage, verse]);
 
-  const handleLangChange = useCallback((e) => {
-    const lang = e.target.value;
-    setTargetLang(lang);
-    if (showTranslate) translate(pageText, lang);
-  }, [setTargetLang, showTranslate, translate, pageText]);
-
-  const toggleTranslate = useCallback(() => {
-    if (showTranslate) { setShowTranslate(false); clear(); }
-    else { setShowTranslate(true); translate(pageText, targetLang); }
-  }, [showTranslate, clear, translate, pageText, targetLang]);
-
-  const bigger  = useCallback(() => setSizeIdx(i => Math.min(i + 1, SIZE_STEPS.length - 1)), []);
-  const smaller = useCallback(() => setSizeIdx(i => Math.max(i - 1, 0)), []);
-
   const goNextPage = useCallback(() => setPage(p => Math.min(p + 1, totalPages - 1)), [totalPages]);
   const goPrevPage = useCallback(() => setPage(p => Math.max(p - 1, 0)), []);
+
+  // ── Swipe navigation ──────────────────────────────────────────────────────
+  const touchStartX = React.useRef(null);
+  const touchStartY = React.useRef(null);
+
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    const startX = touchStartX.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    // Ignore swipes that begin within 30px of either edge — those are reserved
+    // for the browser's back/forward navigation gesture.
+    if (startX < 30 || startX > window.innerWidth - 30) return;
+
+    // Require horizontal dominance and minimum distance to avoid scroll conflicts
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+
+    if (dx < 0) {
+      // swipe left → next
+      if (isSlideMode) { onNext?.(); } else { goNextPage(); }
+    } else {
+      // swipe right → prev
+      if (isSlideMode) { onPrev?.(); } else { goPrevPage(); }
+    }
+  }, [isSlideMode, onNext, onPrev, goNextPage, goPrevPage]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -131,7 +145,12 @@ export function Teleprompter({
   const navNextOff   = showPageNav  ? page === totalPages - 1 : slideIndex === slideTotal - 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: bgColor }}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ background: bgColor, overscrollBehavior: 'none' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
 
       {/* ── Backdrop ── */}
       {backdrop && (
@@ -171,32 +190,7 @@ export function Teleprompter({
         )}
 
         {!isSlideMode && onSpeak && (
-          <button onClick={onSpeak} title={speaking ? 'Stop' : 'Read aloud'}
-            className={`px-3 py-1.5 rounded-lg border active:scale-95 transition text-xs ${btnCls}`}>
-            <FontAwesomeIcon icon={speaking ? faStop : faVolumeHigh} className="mr-1" />
-            {speaking ? 'Stop' : 'Read'}
-          </button>
-        )}
-
-        {!isSlideMode && (
-          <>
-            <select value={targetLang} onChange={handleLangChange}
-              className={`text-xs rounded-lg border px-2 py-1.5 transition focus:outline-none ${btnCls} ${selectBg}`}>
-              {LANGUAGES.map(({ code, label }) => (
-                <option key={code} value={code} className="bg-[#1a1a1a] text-white">{label}</option>
-              ))}
-            </select>
-            <button onClick={toggleTranslate} title="Translate with on-device AI"
-              className={`px-3 py-1.5 rounded-lg border active:scale-95 transition text-xs whitespace-nowrap ${
-                showTranslate ? 'border-amber-500 text-amber-400 bg-amber-500/10' : btnCls
-              }`}>
-              {aiLoading ? (
-                <><FontAwesomeIcon icon={faSpinner} spin className="mr-1" />Translating…</>
-              ) : (
-                <><FontAwesomeIcon icon={faGlobe} className="mr-1" />Translate</>
-              )}
-            </button>
-          </>
+          <SpeakButton speaking={speaking} onClick={onSpeak} theme="dark" />
         )}
 
         <button onClick={onClose} title="Exit (Esc)"
@@ -206,7 +200,7 @@ export function Teleprompter({
       </div>
 
       {/* ── Content ── */}
-      <div className="relative z-10 flex-1 overflow-y-auto flex flex-col items-center justify-center px-5 sm:px-10 py-8 sm:py-12 gap-8">
+      <div className="relative z-10 flex-1 overflow-y-auto flex flex-col items-center justify-center px-5 sm:px-10 py-8 sm:py-12 gap-8" style={{ overscrollBehavior: 'contain' }}>
         {isSlideMode ? children : (
           <>
             <div className="w-full max-w-5xl">
@@ -231,23 +225,13 @@ export function Teleprompter({
               )}
             </div>
 
-            {showTranslate && (
-              <div className="w-full max-w-5xl rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 sm:px-8 py-5 flex flex-col gap-3">
-                <p className="text-[11px] text-amber-400/60 leading-tight">
-                  <FontAwesomeIcon icon={faTriangleExclamation} className="mr-1" />
-                  Translation generated by <strong className="text-amber-400/80">Google Gemini Nano</strong> running on-device.
-                  May contain errors — the website bears <strong className="text-amber-400/80">no responsibility</strong> for mistranslations.
-                  Always verify with a trusted Bible translation.
-                </p>
-                {aiLoading && <p className="text-amber-300 animate-pulse text-center py-4" style={{ fontSize: Math.max(16, fontSize - 8) }}>Translating…</p>}
-                {aiError   && <p className="text-red-400 text-sm">{aiError}</p>}
-                {translation && !aiLoading && (
-                  <p className="text-amber-100 leading-snug"
-                    style={{ fontSize: Math.max(16, fontSize - 8), fontFamily: 'Inter, sans-serif', fontWeight: 400, lineHeight: 1.6 }}>
-                    {translation}
-                  </p>
-                )}
-              </div>
+            {!isSlideMode && (
+              <TeleprompterTranslationSection
+                pageText={pageText}
+                fontSize={fontSize}
+                btnCls={btnCls}
+                selectBg={selectBg}
+              />
             )}
           </>
         )}
@@ -259,18 +243,24 @@ export function Teleprompter({
           <>
             <button onClick={navPrev} disabled={navPrevOff}
               className={`w-7 h-7 rounded-lg border disabled:opacity-25 transition text-xs ${btnCls}`}>↑</button>
-            <div className="flex items-center gap-1.5">
+
+            {/* Dots: only show on sm+ or when count is small; on mobile just show the counter */}
+            <div className="hidden sm:flex items-center gap-1.5">
               {Array.from({ length: Math.min(navTotal, 20) }).map((_, i) => (
                 <div key={i} className={`rounded-full transition-all duration-200 ${
                   i === navIndex ? `w-2 h-2 ${dotActive}` : `w-1.5 h-1.5 ${dotInactive}`
                 }`} />
               ))}
             </div>
+
+            <span className={`text-xs tabular-nums ${counterCls}`}>
+              {navIndex + 1} / {navTotal}
+            </span>
+
             <button onClick={navNext} disabled={navNextOff}
               className={`w-7 h-7 rounded-lg border disabled:opacity-25 transition text-xs ${btnCls}`}>↓</button>
-            <span className={`text-[10px] absolute right-5 ${counterCls}`}>
-              {navIndex + 1} / {navTotal}
-              {showPageNav && <span className="ml-1 opacity-60">· ↑↓ to navigate</span>}
+            <span className={`text-[10px] absolute right-5 hidden sm:inline ${counterCls}`}>
+              {showPageNav && <span className="opacity-60">↑↓ / swipe to navigate</span>}
             </span>
           </>
         ) : (
@@ -281,9 +271,7 @@ export function Teleprompter({
                 {reference}
               </span>
             )}
-            {showTranslate && (
-              <span className={`text-[10px] ${counterCls}`}>· Gemini Nano · on-device AI</span>
-            )}
+
           </>
         )}
       </div>

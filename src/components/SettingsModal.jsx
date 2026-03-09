@@ -1,7 +1,8 @@
 import React from 'react';
-import { useSettingsStore } from '../stores/settingsStore';
-import { useKokoroStore }  from '../stores/kokoroStore';
-import { useKokoro }       from '../context/KokoroContext';
+import { useSettingsStore }    from '../stores/settingsStore';
+import { useKokoroStore }      from '../stores/kokoroStore';
+import { useWebFeaturesStore } from '../stores/webFeaturesStore';
+import { useKokoro }           from '../context/KokoroContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faTriangleExclamation, faSpinner, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 
@@ -35,8 +36,10 @@ export function SettingsModal() {
   const progress        = useKokoroStore(s => s.progress);
   const currentFile     = useKokoroStore(s => s.currentFile);
   const preferredDevice = useKokoroStore(s => s.preferredDevice);
-  const gpuSupported    = useKokoroStore(s => s.gpuSupported);
-  const wasmSupported   = useKokoroStore(s => s.wasmSupported);
+  const gpuSupported    = useWebFeaturesStore(s => s.webgpu);
+  const wasmSupported   = useWebFeaturesStore(s => s.wasm);
+  const speechSupported = useWebFeaturesStore(s => s.speechSynthesis);
+  const hasTts          = gpuSupported || wasmSupported || speechSupported;
 
   const { preload, selectDevice } = useKokoro();
 
@@ -78,7 +81,7 @@ export function SettingsModal() {
           </div>
 
           {/* ── TTS Engine ── */}
-          <Section title="Text-to-Speech Engine">
+          {hasTts && <Section title="Text-to-Speech Engine">
             <OptionRow
               label="Native (Browser)"
               description="Fast, works offline, no download"
@@ -155,10 +158,10 @@ export function SettingsModal() {
                 ? 'Kokoro runs on your GPU via WebGPU — fast but requires ~320 MB download. Chrome 113+ required.'
                 : 'Kokoro runs in your browser via WebAssembly — no GPU needed, smaller download (~92 MB), but slower.'}
             </p>
-          </Section>
+          </Section>}
 
           {/* ── TTS Speed ── */}
-          <Section title="Speech Speed">
+          {hasTts && <Section title="Speech Speed">
             <div className="flex gap-2">
               {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => (
                 <button
@@ -174,7 +177,7 @@ export function SettingsModal() {
                 </button>
               ))}
             </div>
-          </Section>
+          </Section>}
 
           {/* ── Font Size ── */}
           <Section title="Font Size">

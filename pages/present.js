@@ -4,25 +4,33 @@ import Head from '../src/components/Head';
 import { Teleprompter } from '../src/components/Teleprompter';
 import { useBible } from '../src/hooks/useBible';
 import { useSpeech } from '../src/hooks/useSpeech';
+import { useTeleprompterStore } from '../src/stores/teleprompterStore';
 
 /**
- * /present?passage=John+3:16
+ * /present?passage=John+3:16&vpp=5
  *
  * Opens directly in full-screen teleprompter mode.
  * Share or bookmark the URL to present any verse.
+ * ?vpp=N overrides the stored verses-per-page preference once on load.
  */
 export default function PresentPage() {
   const router   = useRouter();
   const { passage, vpp } = router.query;
   const { verse, verses, reference, loading, error, search } = useBible();
   const { speaking, speak, stop } = useSpeech();
+  const setVpp = useTeleprompterStore(s => s.setVpp);
 
   // Fetch the requested passage once the router is ready
   useEffect(() => {
     if (!router.isReady) return;
     if (passage) search(passage);
+    // Honour ?vpp= URL override
+    if (vpp) {
+      const parsed = Math.max(1, Math.min(20, parseInt(vpp, 10) || 5));
+      setVpp(parsed);
+    }
     // If no passage param, useBible already loads votd on mount
-  }, [router.isReady, passage, search]);
+  }, [router.isReady, passage, vpp, search, setVpp]);
 
   const handleSpeak = () => {
     if (speaking) { stop(); return; }
@@ -67,7 +75,6 @@ export default function PresentPage() {
           speaking={speaking}
           onSpeak={handleSpeak}
           onClose={handleClose}
-          versesPerPage={vpp ? Math.max(1, Math.min(20, parseInt(vpp, 10) || 5)) : 5}
         />
       )}
     </>

@@ -5,11 +5,12 @@ import dynamic from 'next/dynamic';
 import Head from '../src/components/Head';
 import { VerseCard } from '../src/components/VerseCard';
 import { SearchForm } from '../src/components/SearchForm';
+import { InfoModal } from '../src/components/InfoModal';
 import { useBible } from '../src/hooks/useBible';
 import { useSpeech } from '../src/hooks/useSpeech';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 
 const VerseAnimation = dynamic(
   () => import('../src/components/VerseAnimation').then(m => m.VerseAnimation),
@@ -19,11 +20,12 @@ const VerseAnimation = dynamic(
 export default function Home({ initialVerse }) {
   const router = useRouter();
   const { verse, verses, reference, loading, error, search } = useBible(initialVerse);
-  const [input,        setInput]        = useState('');
-  const [copied,       setCopied]       = useState(false);
-  const [isSearched,   setIsSearched]   = useState(false);
+  const [input,      setInput]      = useState('');
+  const [copied,     setCopied]     = useState(false);
+  const [isSearched, setIsSearched] = useState(false);
   const { speaking, speak, stop } = useSpeech();
   const openSettings = useSettingsStore(s => s.setSettingsOpen);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const handleCopy = useCallback(() => {
     if (!verse) return;
@@ -73,13 +75,22 @@ export default function Home({ initialVerse }) {
             </h1>
             <p className="text-black/40 text-sm tracking-widest uppercase">Verse of the Day</p>
           </div>
-          <button
-            onClick={() => openSettings(true)}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
-            aria-label="Open settings"
-          >
-            <FontAwesomeIcon icon={faGear} className="text-gray-500 w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setInfoOpen(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+              aria-label="App info"
+            >
+              <FontAwesomeIcon icon={faCircleInfo} className="text-gray-500 w-4 h-4" />
+            </button>
+            <button
+              onClick={() => openSettings(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+              aria-label="Open settings"
+            >
+              <FontAwesomeIcon icon={faGear} className="text-gray-500 w-4 h-4" />
+            </button>
+          </div>
         </header>
 
         {/* ── Verse Animation ── */}
@@ -112,6 +123,8 @@ export default function Home({ initialVerse }) {
         />
 
       </div>
+
+      <InfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
     </>
   );
 }

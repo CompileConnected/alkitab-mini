@@ -1,31 +1,28 @@
 {
-  "name": "create-next-example-app",
-  "description": "A Next.js starter app.",
+  "name": "alkitab-mini-app",
+  "description": "Alkitab Mini web app.",
   "repository": {
     "type": "git",
     "url": "https://github.com/zeit/now/tree/master/examples/nextjs"
   },
   "license": "MIT",
   "scripts": {
-    "dev": "next",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "export": "cross-env NEXT_EXPORT=true next build && cross-env NEXT_EXPORT=true next export"
+    "analyze": "ANALYZE=true yarn build --webpack"
   },
   "dependencies": {
-    "@material-ui/core": "^4.9.5",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/styles": "^4.9.0",
-    "babel-plugin-import": "^1.13.0",
-    "micro-cors": "^0.1.1",
-    "next": "^9.3.2",
-    "next-pwa": "^2.3.0",
-    "react": "^16.12.0",
-    "react-device-detect": "^1.11.14",
-    "react-dom": "^16.12.0"
+    "@tailwindcss/postcss": "^4.2.1",
+    "animejs": "^4.3.6",
+    "autoprefixer": "^10.4.27",
+    "next": "latest",
+    "postcss": "^8.5.8",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.7",
-    "cross-env": "^7.0.2"
+    "@next/bundle-analyzer": "^16.1.6"
   }
 }

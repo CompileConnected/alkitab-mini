@@ -1,105 +1,103 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import Head from '../components/head';
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import FolderIcon from '@material-ui/icons/Folder';
-import RestoreIcon from '@material-ui/icons/Restore';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
-import AppBar from '@material-ui/core/AppBar';
-import HomeIcon from '../components/HomeIcon';
+import { VerseCard } from '../components/VerseCard';
+import { SearchForm } from '../components/SearchForm';
+import { useBible } from '../src/hooks/useBible';
+import { useSpeech } from '../src/hooks/useSpeech';
 
-const useStyles = makeStyles({
-    root: {
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-        border: 0,
-        borderRadius: 3,
-        maxWidth: 'calc(100% - 32px)',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
-        color: 'white',
-        padding: '0 30px',
-    },
-    appBar: {
-        top: 'auto',
-        bottom: 0,
-    },
-    container: {
-        flexGrow: 1
-    },
-    verse: {
-        textAlign: 'center',
-        fontSize: '1.2rem'
-    },
-    hero: {
-        width: '100%',
-        color: "#333"
-    },
-    title: {
-        margin: "0",
-        width: "100%",
-        paddingTop: "80px",
-        lineHeight: "1.15",
-        fontSize: "48px",
-        textAlign: 'center'
-    },
-    description: {
-        textAlign: "center"
-    }
-});
+const VerseAnimation = dynamic(
+  () => import('../components/VerseAnimation').then(m => m.VerseAnimation),
+  { ssr: false }
+);
 
-const Home = () => {
-    const [verse, setVerse] = useState(null);
-    const [menu, setMenu] = React.useState("");
+export default function Home() {
+  const router = useRouter();
+  const { verse, verses, reference, loading, error, search } = useBible();
+  const [input,        setInput]        = useState('');
+  const [copied,       setCopied]       = useState(false);
+  const [isSearched,   setIsSearched]   = useState(false);
+  const { speaking, speak, stop } = useSpeech();
 
-    const classes = useStyles();
+  const handleCopy = useCallback(() => {
+    if (!verse) return;
+    navigator.clipboard.writeText(`"${verse}" — ${reference}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [verse, reference]);
 
-    const handleChange = (event, newValue) => {
-        setMenu(newValue);
-    };
+  const handleSpeak = useCallback(() => {
+    if (speaking) { stop(); return; }
+    const text = verses.length > 1
+      ? verses.map(({ verse: num, text }) => `${num}. ${text}`).join(' ')
+      : verse;
+    speak(text, reference);
+  }, [speaking, speak, stop, verse, verses, reference]);
 
-    useEffect(() => {
-        async function getVerse() {
-            const res = await fetch('/api/bible?passage=John%203:16&type=json');
-            const newVerse = await res.json();
-            setVerse(newVerse[0].text);
-        }
-        getVerse();
-    }, []);
+  const handleSearch = useCallback((e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    setIsSearched(true);
+    search(input.trim());
+  }, [input, search]);
 
-    return (
-        <div>
-            <Head title="Home" />
-            <div className={classes.hero}>
-                <h1 className={classes.title}>Welcome to Alkitab Mini!</h1>
-                <p className={classes.description}>
-                    this project still on progress.. so you will see some changes
-                </p>
-                <Paper className={classes.root}>
-                    <div className={classes.container}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} className={classes.verse}>
-                                {verse}
-                            </Grid>
-                        </Grid>
-                    </div>
-                </Paper>
-            </div>
-            <AppBar position="fixed" color="default" className={classes.appBar}>
-                <BottomNavigation value={menu} onChange={handleChange}>
-                    <BottomNavigationAction label="Home" value="" icon={<HomeIcon />} />
-                    <BottomNavigationAction label="Favorites" value="favorites" icon={<FavoriteIcon />} />
-                    <BottomNavigationAction label="Nearby" value="nearby" icon={<LocationOnIcon />} />
-                    <BottomNavigationAction label="Folder" value="folder" icon={<FolderIcon />} />
-                </BottomNavigation>
-            </AppBar>
+  return (
+    <>
+      <Head title="Alkitab Mini" />
 
-        </div>
-    );
-};
+      {/* ── Background ── */}
+      <div className="fixed inset-0 bg-[#fafaf7] -z-10" />
+      <div
+        className="fixed inset-0 -z-10 pointer-events-none"
+        aria-hidden="true"
+      >
+        <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-amber-100/60 blur-[120px] animate-breathe" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-orange-50/80 blur-[100px] animate-breathe delay-300" />
+      </div>
 
-export default Home;
+      {/* ── Layout ── */}
+      <div className="min-h-screen flex flex-col items-center px-4 py-6 sm:py-10 gap-5 sm:gap-8 max-w-2xl mx-auto pb-28 sm:pb-10">
+
+        {/* ── Header ── */}
+        <header className="w-full flex flex-col items-center gap-2 animate-fade-up">
+          <h1 className="text-black text-3xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Alkitab Mini
+          </h1>
+          <p className="text-black/40 text-sm tracking-widest uppercase">Verse of the Day</p>
+        </header>
+
+        {/* ── Verse Animation ── */}
+        {!isSearched && (
+          <div className="w-full rounded-2xl shadow-lg overflow-hidden animate-fade-up delay-100">
+            <VerseAnimation verseText={verse} reference={reference} />
+          </div>
+        )}
+
+        {/* ── Verse card ── */}
+        <VerseCard
+          reference={reference}
+          loading={loading}
+          verse={verse}
+          verses={verses}
+          error={error}
+          speaking={speaking}
+          onSpeak={handleSpeak}
+          onCopy={handleCopy}
+          copied={copied}
+          onPresent={() => router.push(`/present?passage=${encodeURIComponent(reference || 'votd')}`)}
+        />
+
+        {/* ── Search ── */}
+        <SearchForm
+          input={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={handleSearch}
+          loading={loading}
+        />
+
+      </div>
+    </>
+  );
+}

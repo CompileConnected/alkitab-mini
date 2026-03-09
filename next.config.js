@@ -1,7 +1,9 @@
-const withPWA = require('next-pwa');
+// next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
-module.exports = withPWA({
-  pwa: {
-    dest: 'public'
-  }
-})
+/** @type {import('next').NextConfig} */
+const nextConfig = {};
+
+module.exports = withBundleAnalyzer(nextConfig);

@@ -1,7 +1,3 @@
-import Cors from 'micro-cors'
+import { handler } from '../../controller/BibleController';
 
-const GET = Cors({
-  allowMethods: ['GET', 'HEAD'],
-})
-
-export default GET(require('../../controller/BibleController').handler);
+export default handler;

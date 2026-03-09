@@ -21,11 +21,11 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker=(), sync-xhr=(), usb=(), vr=()"
+          "value": "accelerometer=(), autoplay=(), camera=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://vercel.live https://*.vercel.live https://cdn.jsdelivr.net; connect-src 'self' https://huggingface.co https://*.huggingface.co https://xethub.hf.co https://*.xethub.hf.co; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self'; frame-src 'self' https://vercel.live https://*.vercel.live; img-src 'self' data:; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://vercel.live https://*.vercel.live https://cdn.jsdelivr.net; connect-src 'self' https://huggingface.co https://*.huggingface.co https://xethub.hf.co https://*.xethub.hf.co https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self'; frame-src 'self' https://vercel.live https://*.vercel.live; img-src 'self' data:; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
         }
       ]
     }

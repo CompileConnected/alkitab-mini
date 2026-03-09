@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { getVerseOfTheDay } from '../src/services/BibleService';
 import dynamic from 'next/dynamic';
 import Head from '../src/components/Head';
 import { VerseCard } from '../src/components/VerseCard';
@@ -15,9 +16,9 @@ const VerseAnimation = dynamic(
   { ssr: false }
 );
 
-export default function Home() {
+export default function Home({ initialVerse }) {
   const router = useRouter();
-  const { verse, verses, reference, loading, error, search } = useBible();
+  const { verse, verses, reference, loading, error, search } = useBible(initialVerse);
   const [input,        setInput]        = useState('');
   const [copied,       setCopied]       = useState(false);
   const [isSearched,   setIsSearched]   = useState(false);
@@ -113,4 +114,26 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+/**
+ * ISR: pre-render the homepage with the Verse of the Day at build time.
+ * Revalidate every hour so the page stays fresh without a serverless call
+ * on every visitor request.
+ */
+export async function getStaticProps() {
+  try {
+    const initialVerse = await getVerseOfTheDay();
+    return {
+      props: { initialVerse },
+      revalidate: 43200, // regenerate at most twice per day
+    };
+  } catch {
+    // If the upstream API is unavailable at build time, render without data
+    // and let the client-side fallback in useBible handle it.
+    return {
+      props: { initialVerse: null },
+      revalidate: 300, // retry in 5 min if upstream was down
+    };
+  }
 }

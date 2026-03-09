@@ -1,92 +1,87 @@
 /**
  * BibleController
  *
- * HTTP layer only. Validates the incoming request, delegates to
- * BibleService for data, and writes the HTTP response.
- * No business logic or API-fetching lives here.
+ * HTTP layer only — Edge Runtime version.
+ * Uses Web API Request/Response (no Node.js APIs).
+ * Relies on Vercel's CDN edge cache (Cache-Control headers)
+ * instead of in-memory caching (edge isolates are short-lived).
  */
 
 import { getVerse, getVerseOfTheDay, getRandomVerse } from '../services/BibleService';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 /**
- * In-memory LRU-style cache for upstream Bible API responses.
- * Key: normalised passage string  Value: { result, expiresAt }
- * TTL: 5 min for named passages, 10 s for 'votd'/'random' (they change daily/each call).
+ * Cache-Control values tuned for Vercel's edge CDN.
+ *
+ * - votd:    6 hr CDN cache  (changes once/day at most)
+ * - random:  no-store        (must differ on every call)
+ * - passage: 1 day CDN cache (Bible text is immutable)
  */
-const CACHE_TTL_MS   = 5 * 60 * 1000;  // 5 min for exact passages
-const VOTD_TTL_MS   = 60 * 60 * 1000; // 1 hr  for verse-of-the-day
-const MAX_CACHE_SIZE = 200;
-
-const cache = new Map();
-
-function getCached(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) { cache.delete(key); return null; }
-  return entry.result;
+function cacheControl(normalisedPassage) {
+  if (normalisedPassage === 'random') return 'no-store';
+  if (normalisedPassage === 'votd')   return 'public, s-maxage=21600, stale-while-revalidate=3600';
+  // Specific passages never change — cache aggressively
+  return 'public, s-maxage=86400, stale-while-revalidate=43200';
 }
 
-function setCached(key, result, ttl) {
-  // Evict oldest entry if at capacity
-  if (cache.size >= MAX_CACHE_SIZE) {
-    cache.delete(cache.keys().next().value);
-  }
-  cache.set(key, { result, expiresAt: Date.now() + ttl });
+function json(data, status, normalisedPassage) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': normalisedPassage ? cacheControl(normalisedPassage) : 'no-store',
+      ...CORS_HEADERS,
+    },
+  });
 }
 
 /**
  * GET /api/bible?passage=<string>
  *
- * Returns: { text: string, reference: string }
+ * Returns: { text: string, reference: string, verses: [...] }
  */
-export async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+export async function handler(req) {
   if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return json({ error: 'Method not allowed' }, 405);
   }
 
-  const { passage } = req.query;
+  const { searchParams } = new URL(req.url);
+  const passage = searchParams.get('passage');
 
-  if (!passage || typeof passage !== 'string' || !passage.trim()) {
-    return res.status(400).json({ error: 'Missing required query parameter: passage' });
+  if (!passage || !passage.trim()) {
+    return json({ error: 'Missing required query parameter: passage' }, 400);
   }
 
   const normalised = passage.trim().toLowerCase();
 
   try {
-    // Serve from cache when possible
-    const cached = getCached(normalised);
-    if (cached) return res.status(200).json(cached);
-
     let result;
 
     if (normalised === 'votd') {
       result = await getVerseOfTheDay();
-      setCached(normalised, result, VOTD_TTL_MS);
     } else if (normalised === 'random') {
       result = await getRandomVerse();
-      // 'random' is intentionally not cached — each call should differ
     } else {
       result = await getVerse(passage.trim());
-      setCached(normalised, result, CACHE_TTL_MS);
     }
 
-    return res.status(200).json(result);
+    return json(result, 200, normalised);
   } catch (err) {
     console.error('[BibleController] error:', err.message);
 
-    // Distinguish upstream failures from unexpected crashes
     if (err.message.includes('NET Bible API')) {
-      return res.status(502).json({ error: 'Upstream Bible API is unavailable. Please try again.' });
+      return json({ error: 'Upstream Bible API is unavailable. Please try again.' }, 502);
     }
 
-    return res.status(500).json({ error: 'Unexpected server error' });
+    return json({ error: 'Unexpected server error' }, 500);
   }
 }

@@ -1,7 +1,4 @@
-// next.config.js
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,8 +7,8 @@ const nextConfig = {
     resolveAlias: {
       // kokoro-js imports path/fs/promises but branches on them at runtime;
       // stub fs out so the browser fetch path is used.
-      'path':        'path-browserify',
-      'fs':          './src/lib/empty-module.js',
+      path: 'path-browserify',
+      fs: './src/lib/empty-module.js',
       'fs/promises': './src/lib/empty-module.js',
     },
   },
@@ -21,13 +18,19 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        fs:            false,
-        path:          require.resolve('path-browserify'),
+        fs: false,
         'fs/promises': false,
+        // In ESM, we don't use require.resolve, we use the string path
+        path: 'path-browserify',
       };
     }
     return config;
   },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+// Initialize the bundle analyzer with your config
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default bundleAnalyzer(nextConfig);

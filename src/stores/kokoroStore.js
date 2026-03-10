@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { withDevtools } from './withDevtools';
-import { useWebFeaturesStore } from './webFeaturesStore';
 
 /**
  * Kokoro TTS reactive state store.
@@ -13,13 +12,13 @@ export const useKokoroStore = create(
   withDevtools(
     (set) => ({
       // Engine status
-      status: 'idle',   // 'idle' | 'downloading' | 'loading' | 'ready' | 'error'
+      status: 'idle', // 'idle' | 'downloading' | 'loading' | 'ready' | 'error'
       progress: 0,
       currentFile: '',
       speaking: false,
 
       // Active device after a successful load
-      device: null,     // 'webgpu' | 'wasm' | null
+      device: null, // 'webgpu' | 'wasm' | null
 
       // User's chosen backend — derived from webFeaturesStore at init time
       preferredDevice: null,
@@ -31,10 +30,14 @@ export const useKokoroStore = create(
       setSpeaking: (speaking) => set({ speaking }),
       setDevice: (device) => set({ device }),
       setPreferredDevice: (preferredDevice) => set({ preferredDevice }),
-      resetPipeline: () => set({
-        status: 'idle', progress: 0, currentFile: '', device: null,
-      }),
+      resetPipeline: () =>
+        set({
+          status: 'idle',
+          progress: 0,
+          currentFile: '',
+          device: null,
+        }),
     }),
-    { name: 'KokoroStore', store: 'AlkitabMini' },
-  ),
+    { name: 'KokoroStore', store: 'AlkitabMini' }
+  )
 );

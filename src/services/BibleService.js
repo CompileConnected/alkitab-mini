@@ -39,17 +39,20 @@ function toVerseResult(raws) {
   // Individual verses with their numbers preserved
   const verses = raws.map((v) => ({
     verse: parseInt(v.verse, 10),
-    text:  v.text.trim(),
+    text: v.text.trim(),
   }));
 
   // Reference: "John 3:16" for single verse, "John 3:16–17" for range
   const first = raws[0];
-  const last  = raws[raws.length - 1];
+  const last = raws[raws.length - 1];
 
   let reference;
   if (raws.length === 1) {
     reference = formatReference(first);
-  } else if (first.bookname === last.bookname && first.chapter === last.chapter) {
+  } else if (
+    first.bookname === last.bookname &&
+    first.chapter === last.chapter
+  ) {
     reference = `${first.bookname} ${first.chapter}:${first.verse}–${last.verse}`;
   } else {
     reference = `${formatReference(first)}–${formatReference(last)}`;

@@ -26,7 +26,9 @@ let aiSession = null;
 
 function destroySession() {
   if (aiSession) {
-    try { aiSession.destroy(); } catch (_) {}
+    try {
+      aiSession.destroy();
+    } catch {}
     aiSession = null;
   }
 }
@@ -47,92 +49,120 @@ function destroySession() {
 export const useTranslationStore = create(
   withDevtools(
     (set, get) => ({
-  // ── Translation result ────────────────────────────────────────────────
-  translation:   '',
-  loading:       false,
-  error:         null,
+      // ── Translation result ────────────────────────────────────────────────
+      translation: '',
+      loading: false,
+      error: null,
 
-  // ── UI state ──────────────────────────────────────────────────────────
-  targetLang: 'id',
+      // ── UI state ──────────────────────────────────────────────────────────
+      targetLang: 'id',
 
-  // ── Actions ───────────────────────────────────────────────────────────
-  setTargetLang: (targetLang) => set({ targetLang }),
+      // ── Actions ───────────────────────────────────────────────────────────
+      setTargetLang: (targetLang) => set({ targetLang }),
 
-  clear: () => {
-    destroySession();
-    set({ translation: '', error: null });
-  },
+      clear: () => {
+        destroySession();
+        set({ translation: '', error: null });
+      },
 
-  /**
-   * Translate `text` into `lang` (falls back to store's targetLang).
-   *
-   * Priority:
-   *   1. Translation API (Chrome 138+)
-   *   2. Prompt API / Gemini Nano (Chrome 127+)
-   */
-  translate: async (text, lang) => {
-    const useLang = lang ?? get().targetLang;
-    if (!text) return;
+      /**
+       * Translate `text` into `lang` (falls back to store's targetLang).
+       *
+       * Priority:
+       *   1. Translation API (Chrome 138+)
+       *   2. Prompt API / Gemini Nano (Chrome 127+)
+       */
+      translate: async (text, lang) => {
+        const useLang = lang ?? get().targetLang;
+        if (!text) return;
 
-    destroySession();
-    set({ loading: true, error: null, translation: '' }, false, 'translate/start');
+        destroySession();
+        set(
+          { loading: true, error: null, translation: '' },
+          false,
+          'translate/start'
+        );
 
-    try {
-      // ── 1. Translation API (Chrome 138+) ──────────────────────────────
-      if (typeof window !== 'undefined' && 'translation' in window) {
         try {
-          const canTranslate = await window.translation.canTranslate({
-            sourceLanguage: 'en',
-            targetLanguage: useLang,
-          });
+          // ── 1. Translation API (Chrome 138+) ──────────────────────────────
+          if (typeof window !== 'undefined' && 'translation' in window) {
+            try {
+              const canTranslate = await window.translation.canTranslate({
+                sourceLanguage: 'en',
+                targetLanguage: useLang,
+              });
 
-          if (canTranslate !== 'no') {
-            const translator = await window.translation.createTranslator({
-              sourceLanguage: 'en',
-              targetLanguage: useLang,
+              if (canTranslate !== 'no') {
+                const translator = await window.translation.createTranslator({
+                  sourceLanguage: 'en',
+                  targetLanguage: useLang,
+                });
+                if (canTranslate === 'after-download') await translator.ready;
+                const result = await translator.translate(text);
+                set(
+                  { translation: result, loading: false },
+                  false,
+                  'translate/done/translationApi'
+                );
+                return;
+              }
+            } catch (translationErr) {
+              console.warn(
+                '[AI Translation] Translation API failed, falling back to Prompt API:',
+                translationErr
+              );
+            }
+          }
+
+          // ── 2. Prompt API / Gemini Nano (Chrome 127+) ─────────────────────
+          if (typeof window !== 'undefined' && window?.ai?.languageModel) {
+            const langLabel =
+              LANGUAGES.find((l) => l.code === useLang)?.label ?? useLang;
+
+            const session = await window.ai.languageModel.create({
+              systemPrompt: [
+                `You are a Bible verse translator.`,
+                `Translate the given English Bible text into ${langLabel}.`,
+                `Output ONLY the translated text — no explanations, no notes, no commentary.`,
+                `Preserve verse numbers exactly as they appear (e.g. "1 In the beginning…" stays numbered).`,
+              ].join(' '),
             });
-            if (canTranslate === 'after-download') await translator.ready;
-            const result = await translator.translate(text);
-            set({ translation: result, loading: false }, false, 'translate/done/translationApi');
+            aiSession = session;
+
+            const result = await session.prompt(
+              `Translate the following Bible verse(s) to ${langLabel}:\n\n${text}`
+            );
+            set(
+              { translation: result.trim(), loading: false },
+              false,
+              'translate/done/geminiNano'
+            );
             return;
           }
-        } catch (translationErr) {
-          console.warn('[AI Translation] Translation API failed, falling back to Prompt API:', translationErr);
+
+          // ── 3. Not available ───────────────────────────────────────────────
+          set(
+            {
+              loading: false,
+              error:
+                'Chrome Built-in AI is not available on this browser. ' +
+                'Please use Chrome 127 or later and enable AI features in chrome://flags.',
+            },
+            false,
+            'translate/unavailable'
+          );
+        } catch (err) {
+          set(
+            {
+              loading: false,
+              error: 'Translation failed: ' + (err?.message ?? String(err)),
+            },
+            false,
+            'translate/error'
+          );
         }
-      }
-
-      // ── 2. Prompt API / Gemini Nano (Chrome 127+) ─────────────────────
-      if (typeof window !== 'undefined' && window?.ai?.languageModel) {
-        const langLabel = LANGUAGES.find(l => l.code === useLang)?.label ?? useLang;
-
-        const session = await window.ai.languageModel.create({
-          systemPrompt: [
-            `You are a Bible verse translator.`,
-            `Translate the given English Bible text into ${langLabel}.`,
-            `Output ONLY the translated text — no explanations, no notes, no commentary.`,
-            `Preserve verse numbers exactly as they appear (e.g. "1 In the beginning…" stays numbered).`,
-          ].join(' '),
-        });
-        aiSession = session;
-
-        const result = await session.prompt(
-          `Translate the following Bible verse(s) to ${langLabel}:\n\n${text}`
-        );
-        set({ translation: result.trim(), loading: false }, false, 'translate/done/geminiNano');
-        return;
-      }
-
-      // ── 3. Not available ───────────────────────────────────────────────
-      set({
-        loading: false,
-        error: 'Chrome Built-in AI is not available on this browser. ' +
-          'Please use Chrome 127 or later and enable AI features in chrome://flags.',
-      }, false, 'translate/unavailable');
-    } catch (err) {
-      set({ loading: false, error: 'Translation failed: ' + (err?.message ?? String(err)) }, false, 'translate/error');
-    }
-  },
-  }),
-  { name: 'TranslationStore', store: 'AlkitabMini' },
-  ),
+      },
+    }),
+    { name: 'TranslationStore', store: 'AlkitabMini' }
+  )
 );

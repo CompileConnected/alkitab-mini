@@ -14,11 +14,11 @@ import { useTeleprompterStore } from '../src/stores/teleprompterStore';
  * ?vpp=N overrides the stored verses-per-page preference once on load.
  */
 export default function PresentPage() {
-  const router   = useRouter();
+  const router = useRouter();
   const { passage, vpp } = router.query;
   const { verse, verses, reference, loading, error, search } = useBible();
   const { speaking, speak, stop } = useSpeech();
-  const setVpp = useTeleprompterStore(s => s.setVpp);
+  const setVpp = useTeleprompterStore((s) => s.setVpp);
 
   // Fetch the requested passage once the router is ready
   useEffect(() => {
@@ -33,10 +33,14 @@ export default function PresentPage() {
   }, [router.isReady, passage, vpp, search, setVpp]);
 
   const handleSpeak = () => {
-    if (speaking) { stop(); return; }
-    const text = verses.length > 1
-      ? verses.map(({ verse: num, text }) => `${num}. ${text}`).join(' ')
-      : verse;
+    if (speaking) {
+      stop();
+      return;
+    }
+    const text =
+      verses.length > 1
+        ? verses.map(({ verse: num, text }) => `${num}. ${text}`).join(' ')
+        : verse;
     speak(text, reference);
   };
 
@@ -47,7 +51,9 @@ export default function PresentPage() {
 
   return (
     <>
-      <Head title={reference ? `${reference} · Present` : 'Present · Alkitab Mini'} />
+      <Head
+        title={reference ? `${reference} · Present` : 'Present · Alkitab Mini'}
+      />
 
       {loading && (
         <div className="fixed inset-0 bg-[#0d0d0d] flex items-center justify-center">
@@ -69,6 +75,7 @@ export default function PresentPage() {
 
       {!loading && !error && verse && (
         <Teleprompter
+          key={reference}
           verse={verse}
           verses={verses}
           reference={reference}

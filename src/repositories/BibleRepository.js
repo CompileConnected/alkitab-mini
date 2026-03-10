@@ -20,8 +20,8 @@ const BASE_URL = 'https://labs.bible.org/api/';
  */
 function buildUrl(passage) {
   const params = new URLSearchParams({
-    passage:    passage,
-    type:       'json',
+    passage: passage,
+    type: 'json',
     formatting: 'plain',
   });
   return `${BASE_URL}?${params.toString()}`;

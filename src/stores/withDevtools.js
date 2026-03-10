@@ -8,6 +8,7 @@ import { devtools } from 'zustand/middleware';
  * Usage (identical to plain devtools):
  *   create(withDevtools(fn, { name: 'MyStore', store: 'AlkitabMini' }))
  */
-export const withDevtools = process.env.NODE_ENV === 'production'
-  ? (fn) => fn          // production: passthrough, ignore options
-  : (fn, options) => devtools(fn, options);  // development: full devtools
+export const withDevtools =
+  process.env.NODE_ENV === 'production'
+    ? (fn) => fn // production: passthrough, ignore options
+    : (fn, options) => devtools(fn, options); // development: full devtools

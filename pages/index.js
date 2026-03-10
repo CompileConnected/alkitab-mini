@@ -13,18 +13,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 
 const VerseAnimation = dynamic(
-  () => import('../src/components/VerseAnimation').then(m => m.VerseAnimation),
+  () =>
+    import('../src/components/VerseAnimation').then((m) => m.VerseAnimation),
   { ssr: false }
 );
 
 export default function Home({ initialVerse }) {
   const router = useRouter();
-  const { verse, verses, reference, loading, error, search } = useBible(initialVerse);
-  const [input,      setInput]      = useState('');
-  const [copied,     setCopied]     = useState(false);
+  const { verse, verses, reference, loading, error, search } =
+    useBible(initialVerse);
+  const [input, setInput] = useState('');
+  const [copied, setCopied] = useState(false);
   const [isSearched, setIsSearched] = useState(false);
   const { speaking, speak, stop } = useSpeech();
-  const openSettings = useSettingsStore(s => s.setSettingsOpen);
+  const openSettings = useSettingsStore((s) => s.setSettingsOpen);
   const [infoOpen, setInfoOpen] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -36,19 +38,26 @@ export default function Home({ initialVerse }) {
   }, [verse, reference]);
 
   const handleSpeak = useCallback(() => {
-    if (speaking) { stop(); return; }
-    const text = verses.length > 1
-      ? verses.map(({ verse: num, text }) => `${num}. ${text}`)
-      : verse;
+    if (speaking) {
+      stop();
+      return;
+    }
+    const text =
+      verses.length > 1
+        ? verses.map(({ verse: num, text }) => `${num}. ${text}`)
+        : verse;
     speak(text, reference);
   }, [speaking, speak, stop, verse, verses, reference]);
 
-  const handleSearch = useCallback((e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    setIsSearched(true);
-    search(input.trim());
-  }, [input, search]);
+  const handleSearch = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (!input.trim()) return;
+      setIsSearched(true);
+      search(input.trim());
+    },
+    [input, search]
+  );
 
   return (
     <>
@@ -66,14 +75,18 @@ export default function Home({ initialVerse }) {
 
       {/* ── Layout ── */}
       <div className="min-h-screen flex flex-col items-center px-4 py-6 sm:py-10 gap-5 sm:gap-8 max-w-2xl mx-auto pb-28 sm:pb-10">
-
         {/* ── Header ── */}
         <header className="w-full flex items-center justify-between animate-fade-up">
           <div className="flex flex-col items-start gap-1">
-            <h1 className="text-black text-3xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1
+              className="text-black text-3xl font-bold tracking-tight"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Alkitab Mini
             </h1>
-            <p className="text-black/40 text-sm tracking-widest uppercase">Verse of the Day</p>
+            <p className="text-black/40 text-sm tracking-widest uppercase">
+              Verse of the Day
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -81,14 +94,20 @@ export default function Home({ initialVerse }) {
               className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
               aria-label="App info"
             >
-              <FontAwesomeIcon icon={faCircleInfo} className="text-gray-500 w-4 h-4" />
+              <FontAwesomeIcon
+                icon={faCircleInfo}
+                className="text-gray-500 w-4 h-4"
+              />
             </button>
             <button
               onClick={() => openSettings(true)}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors"
               aria-label="Open settings"
             >
-              <FontAwesomeIcon icon={faGear} className="text-gray-500 w-4 h-4" />
+              <FontAwesomeIcon
+                icon={faGear}
+                className="text-gray-500 w-4 h-4"
+              />
             </button>
           </div>
         </header>
@@ -111,7 +130,11 @@ export default function Home({ initialVerse }) {
           onSpeak={handleSpeak}
           onCopy={handleCopy}
           copied={copied}
-          onPresent={() => router.push(`/present?passage=${encodeURIComponent(reference || 'votd')}`)}
+          onPresent={() =>
+            router.push(
+              `/present?passage=${encodeURIComponent(reference || 'votd')}`
+            )
+          }
         />
 
         {/* ── Search ── */}
@@ -121,7 +144,6 @@ export default function Home({ initialVerse }) {
           onSubmit={handleSearch}
           loading={loading}
         />
-
       </div>
 
       <InfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />

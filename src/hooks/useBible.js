@@ -24,19 +24,19 @@ export function useBible(initialVerse = null) {
   }
 
   // Reactive selectors — components re-render on store changes
-  const verse     = useBibleStore(s => s.verse);
-  const verses    = useBibleStore(s => s.verses);
-  const reference = useBibleStore(s => s.reference);
-  const loading   = useBibleStore(s => s.loading);
-  const error     = useBibleStore(s => s.error);
-  const search    = useBibleStore(s => s.search);
+  const verse = useBibleStore((s) => s.verse);
+  const verses = useBibleStore((s) => s.verses);
+  const reference = useBibleStore((s) => s.reference);
+  const loading = useBibleStore((s) => s.loading);
+  const error = useBibleStore((s) => s.error);
+  const search = useBibleStore((s) => s.search);
 
   // Client-side fetch on mount when no ISR data was provided
   useEffect(() => {
     if (seeded.current) return; // already seeded from ISR
     seeded.current = true;
     useBibleStore.getState().fetchVerse('votd');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return { verse, verses, reference, loading, error, search };
 }

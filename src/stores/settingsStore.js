@@ -10,37 +10,37 @@ import { withDevtools } from './withDevtools';
 export const useSettingsStore = create(
   withDevtools(
     persist(
-    (set) => ({
-      // Persisted preferences
-      ttsEngine:   'native',  // 'native' | 'kokoro'
-      ttsSpeed:    1,         // 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2
-      fontSize:    'md',      // 'sm' | 'md' | 'lg' | 'xl'
-      fontFamily:  'serif',   // 'serif' | 'sans'
+      (set) => ({
+        // Persisted preferences
+        ttsEngine: 'native', // 'native' | 'kokoro'
+        ttsSpeed: 1, // 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2
+        fontSize: 'md', // 'sm' | 'md' | 'lg' | 'xl'
+        fontFamily: 'serif', // 'serif' | 'sans'
 
-      // Transient UI state
-      settingsOpen: false,
+        // Transient UI state
+        settingsOpen: false,
 
-      // Actions
-      update:          (key, value) => set({ [key]: value }),
-      setSettingsOpen: (open)       => set({ settingsOpen: open }),
-    }),
-    {
-      name:        'alkitab-settings',
-      version:     2,
-      // Only persist user preferences, not modal open state
-      partialize:  (s) => ({
-        ttsEngine:  s.ttsEngine,
-        ttsSpeed:   s.ttsSpeed,
-        fontSize:   s.fontSize,
-        fontFamily: s.fontFamily,
+        // Actions
+        update: (key, value) => set({ [key]: value }),
+        setSettingsOpen: (open) => set({ settingsOpen: open }),
       }),
-      // v0→v1→v2: reset ttsEngine to 'native' (default)
-      migrate: (stored) => ({
-        ...stored,
-        ttsEngine: 'native',
-      }),
-    },
+      {
+        name: 'alkitab-settings',
+        version: 2,
+        // Only persist user preferences, not modal open state
+        partialize: (s) => ({
+          ttsEngine: s.ttsEngine,
+          ttsSpeed: s.ttsSpeed,
+          fontSize: s.fontSize,
+          fontFamily: s.fontFamily,
+        }),
+        // v0→v1→v2: reset ttsEngine to 'native' (default)
+        migrate: (stored) => ({
+          ...stored,
+          ttsEngine: 'native',
+        }),
+      }
     ),
-    { name: 'SettingsStore', store: 'AlkitabMini' },
-  ),
+    { name: 'SettingsStore', store: 'AlkitabMini' }
+  )
 );

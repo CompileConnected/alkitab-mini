@@ -4,18 +4,29 @@ const defaultDescription = 'Alkitab Mini — daily Bible verse reader';
 const defaultOGURL = '';
 const defaultOGImage = '';
 
-const Head = props => (
+const Head = (props) => (
   <NextHead>
     <meta charSet="UTF-8" />
-    <title>{props.title ? `${props.title} · Alkitab Mini` : 'Alkitab Mini'}</title>
-    <meta name="description" content={props.description || defaultDescription} />
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover" />
+    <title>
+      {props.title ? `${props.title} · Alkitab Mini` : 'Alkitab Mini'}
+    </title>
+    <meta
+      name="description"
+      content={props.description || defaultDescription}
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover"
+    />
     <link rel="icon" href="/favicon.ico" />
 
     {/* Open Graph */}
     <meta property="og:url" content={props.url || defaultOGURL} />
     <meta property="og:title" content={props.title || 'Alkitab Mini'} />
-    <meta property="og:description" content={props.description || defaultDescription} />
+    <meta
+      property="og:description"
+      content={props.description || defaultDescription}
+    />
     <meta property="og:image" content={props.ogImage || defaultOGImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -24,13 +35,19 @@ const Head = props => (
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content={props.url || defaultOGURL} />
     <meta name="twitter:title" content={props.title || 'Alkitab Mini'} />
-    <meta name="twitter:description" content={props.description || defaultDescription} />
+    <meta
+      name="twitter:description"
+      content={props.description || defaultDescription}
+    />
     <meta name="twitter:image" content={props.ogImage || defaultOGImage} />
 
     {/* PWA / Mobile */}
     <meta name="theme-color" content="white" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content={props.title || 'Alkitab Mini'} />
+    <meta
+      name="apple-mobile-web-app-title"
+      content={props.title || 'Alkitab Mini'}
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="msapplication-navbutton-color" content="white" />

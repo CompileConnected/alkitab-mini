@@ -50,6 +50,6 @@ export const useSpeechStore = create(
         }
       },
     }),
-    { name: 'SpeechStore', store: 'AlkitabMini' },
-  ),
+    { name: 'SpeechStore', store: 'AlkitabMini' }
+  )
 );

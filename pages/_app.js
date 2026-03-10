@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { KokoroProvider } from '../src/context/KokoroContext';
-import { SettingsModal }  from '../src/components/SettingsModal';
+import { SettingsModal } from '../src/components/SettingsModal';
 import { useWebFeaturesStore } from '../src/stores/webFeaturesStore';
 import { useSpeechStore } from '../src/stores/speechStore';
 

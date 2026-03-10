@@ -7,10 +7,14 @@
  * instead of in-memory caching (edge isolates are short-lived).
  */
 
-import { getVerse, getVerseOfTheDay, getRandomVerse } from '../services/BibleService';
+import {
+  getVerse,
+  getVerseOfTheDay,
+  getRandomVerse,
+} from '../services/BibleService';
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
@@ -24,7 +28,8 @@ const CORS_HEADERS = {
  */
 function cacheControl(normalisedPassage) {
   if (normalisedPassage === 'random') return 'no-store';
-  if (normalisedPassage === 'votd')   return 'public, s-maxage=21600, stale-while-revalidate=3600';
+  if (normalisedPassage === 'votd')
+    return 'public, s-maxage=21600, stale-while-revalidate=3600';
   // Specific passages never change — cache aggressively
   return 'public, s-maxage=86400, stale-while-revalidate=43200';
 }
@@ -34,7 +39,9 @@ function json(data, status, normalisedPassage) {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': normalisedPassage ? cacheControl(normalisedPassage) : 'no-store',
+      'Cache-Control': normalisedPassage
+        ? cacheControl(normalisedPassage)
+        : 'no-store',
       ...CORS_HEADERS,
     },
   });
@@ -79,7 +86,10 @@ export async function handler(req) {
     console.error('[BibleController] error:', err.message);
 
     if (err.message.includes('NET Bible API')) {
-      return json({ error: 'Upstream Bible API is unavailable. Please try again.' }, 502);
+      return json(
+        { error: 'Upstream Bible API is unavailable. Please try again.' },
+        502
+      );
     }
 
     return json({ error: 'Unexpected server error' }, 500);

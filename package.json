@@ -1,6 +1,7 @@
 {
   "name": "alkitab-mini-app",
   "description": "Alkitab Mini web app.",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/zeit/now/tree/master/examples/nextjs"
@@ -10,7 +11,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "analyze": "ANALYZE=true yarn build --webpack"
+    "analyze": "ANALYZE=true yarn build --webpack",
+    "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
@@ -30,6 +35,22 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.1.6",
-    "path-browserify": "^1.0.1"
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.3",
+    "path-browserify": "^1.0.1",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

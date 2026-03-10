@@ -61,12 +61,12 @@ export function SettingsModal() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100]"
         onClick={() => setSettingsOpen(false)}
       />
 
       {/* Sheet — slides up on mobile, centered on desktop */}
-      <div className="fixed bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 pointer-events-none">
+      <div className="fixed bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-[110] pointer-events-none">
         <div className="pointer-events-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-md max-h-[85vh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">

@@ -1,3 +1,6 @@
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+
 import '../styles/globals.css';
 import { useEffect } from 'react';
 import { config } from '@fortawesome/fontawesome-svg-core';

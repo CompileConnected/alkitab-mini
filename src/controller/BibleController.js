@@ -18,20 +18,17 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
+import { CACHE_POLICIES } from '../lib/policy';
 
-/**
- * Cache-Control values tuned for Vercel's edge CDN.
- *
- * - votd:    6 hr CDN cache  (changes once/day at most)
- * - random:  no-store        (must differ on every call)
- * - passage: 1 day CDN cache (Bible text is immutable)
- */
 function cacheControl(normalisedPassage) {
   if (normalisedPassage === 'random') return 'no-store';
-  if (normalisedPassage === 'votd')
-    return 'public, s-maxage=21600, stale-while-revalidate=3600';
-  // Specific passages never change — cache aggressively
-  return 'public, s-maxage=86400, stale-while-revalidate=43200';
+
+  const policy =
+    normalisedPassage === 'votd'
+      ? CACHE_POLICIES.BIBLE_VOTD
+      : CACHE_POLICIES.BIBLE_PASSAGE;
+
+  return `public, s-maxage=${policy.cdn_maxage}, stale-while-revalidate=${policy.cdn_swr}`;
 }
 
 function json(data, status, normalisedPassage) {

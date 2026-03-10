@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useAITranslation, LANGUAGES } from '../hooks/useAITranslation';
 import { useWebFeaturesStore } from '../stores/webFeaturesStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faGlobe,
@@ -8,6 +9,13 @@ import {
   faXmark,
   faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
+
+const FONT_SIZE_MAP = {
+  sm: 16,
+  md: 18,
+  lg: 21,
+  xl: 24,
+};
 
 /**
  * Derive which translation mode is available from webFeaturesStore state.
@@ -21,7 +29,15 @@ function useTranslationMode() {
   return null; // both confirmed unavailable → hide UI
 }
 
-function TranslationPanel({ translation, loading, error, onClose, mode }) {
+function TranslationPanel({
+  translation,
+  loading,
+  error,
+  onClose,
+  mode,
+  contentFontFamily,
+  contentFontSize,
+}) {
   return (
     <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 flex flex-col gap-2 text-sm">
       {mode === 'gemini' && (
@@ -45,7 +61,11 @@ function TranslationPanel({ translation, loading, error, onClose, mode }) {
       {translation && !loading && (
         <p
           className="text-gray-800 leading-relaxed"
-          style={{ lineHeight: 1.75 }}
+          style={{
+            fontSize: Math.max(14, contentFontSize - 2),
+            fontFamily: contentFontFamily,
+            lineHeight: 1.75,
+          }}
         >
           {translation}
         </p>
@@ -69,6 +89,11 @@ function TranslationPanel({ translation, loading, error, onClose, mode }) {
  */
 export function TranslationSection({ verseText }) {
   const mode = useTranslationMode();
+  const fontFamily = useSettingsStore((s) => s.fontFamily);
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const contentFontFamily =
+    fontFamily === 'serif' ? "'Playfair Display', serif" : 'Inter, sans-serif';
+  const contentFontSize = FONT_SIZE_MAP[fontSize] ?? FONT_SIZE_MAP.md;
   const {
     translation,
     loading,
@@ -159,6 +184,8 @@ export function TranslationSection({ verseText }) {
           error={error}
           onClose={toggleTranslate}
           mode={mode}
+          contentFontFamily={contentFontFamily}
+          contentFontSize={contentFontSize}
         />
       )}
     </>
@@ -174,6 +201,7 @@ export function TranslationSection({ verseText }) {
 export function TeleprompterTranslationSection({
   pageText,
   fontSize,
+  fontFamily,
   btnCls,
   selectBg,
 }) {
@@ -219,6 +247,8 @@ export function TeleprompterTranslationSection({
 
   const btnLabel = mode === 'gemini' ? 'AI Translate' : 'Translate';
   const resultSize = Math.max(16, fontSize - 8);
+  const contentFontFamily =
+    fontFamily === 'serif' ? "'Playfair Display', serif" : 'Inter, sans-serif';
 
   return (
     <div className="w-full max-w-5xl flex flex-col gap-3">
@@ -291,7 +321,7 @@ export function TeleprompterTranslationSection({
               className="text-amber-100 leading-snug"
               style={{
                 fontSize: resultSize,
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: contentFontFamily,
                 fontWeight: 400,
                 lineHeight: 1.6,
               }}

@@ -1,8 +1,50 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useKokoroStore } from '../stores/kokoroStore';
 import { useSpeechStore } from '../stores/speechStore';
 import { useKokoro } from '../context/KokoroContext';
+
+const NATIVE_MAX_CHARS = 220;
+
+function normalizeSegments(textOrTexts) {
+  if (Array.isArray(textOrTexts)) {
+    return textOrTexts
+      .map((t) => (typeof t === 'string' ? t.trim() : ''))
+      .filter(Boolean);
+  }
+
+  if (typeof textOrTexts !== 'string') return [];
+  const text = textOrTexts.trim();
+  return text ? [text] : [];
+}
+
+function splitForNative(text, maxChars = NATIVE_MAX_CHARS) {
+  const src = (text ?? '').trim();
+  if (!src) return [];
+
+  const words = src.split(/\s+/);
+  const chunks = [];
+  let current = '';
+
+  for (const word of words) {
+    // Keep extremely long tokens as-is to avoid destructive splitting.
+    if (!current) {
+      current = word;
+      continue;
+    }
+
+    const next = `${current} ${word}`;
+    if (next.length > maxChars) {
+      chunks.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) chunks.push(current);
+  return chunks;
+}
 
 /**
  * useSpeech — unified TTS hook supporting native Web Speech API and Kokoro AI.
@@ -23,24 +65,28 @@ export function useSpeech({ lang = 'en-US', pitch = 0.95 } = {}) {
   const setNativeSpeaking = useSpeechStore((s) => s.setNativeSpeaking);
   const voices = useSpeechStore((s) => s.voices);
   const kokoro = useKokoro();
+  const nativeRunIdRef = useRef(0);
   // Voice loading is handled once globally by initVoices() in _app.js
 
   const stopNative = useCallback(() => {
+    nativeRunIdRef.current += 1;
     window.speechSynthesis.cancel();
     setNativeSpeaking(false);
   }, [setNativeSpeaking]);
 
   const speakNative = useCallback(
-    (text, label = '') => {
-      if (!text) return;
+    (textOrTexts, label = '') => {
+      const segments = normalizeSegments(textOrTexts);
+      if (!segments.length) return;
 
+      nativeRunIdRef.current += 1;
+      const runId = nativeRunIdRef.current;
       window.speechSynthesis.cancel();
 
-      const fullText = label ? `${text}. — ${label}` : text;
-      const utt = new SpeechSynthesisUtterance(fullText);
-      utt.lang = lang;
-      utt.rate = (ttsSpeed ?? 1) * 0.88; // scale: 1× = natural 0.88 rate
-      utt.pitch = pitch;
+      // Feed one chunk at a time to avoid huge utterances causing instability.
+      const queue = segments.flatMap((segment) => splitForNative(segment));
+      if (label) queue.push(`Reference ${label}`);
+      if (!queue.length) return;
 
       // Pick the most natural voice available
       const voice =
@@ -53,21 +99,49 @@ export function useSpeech({ lang = 'en-US', pitch = 0.95 } = {}) {
         voices.find((v) => v.lang.startsWith('en')) ??
         null;
 
-      if (voice) utt.voice = voice;
-
-      utt.onend = () => setNativeSpeaking(false);
-      utt.onerror = () => setNativeSpeaking(false);
-
       setNativeSpeaking(true);
-      window.speechSynthesis.speak(utt);
+
+      let index = 0;
+      const speakNext = () => {
+        if (nativeRunIdRef.current !== runId) return;
+        if (index >= queue.length) {
+          setNativeSpeaking(false);
+          return;
+        }
+
+        const utt = new SpeechSynthesisUtterance(queue[index]);
+        index += 1;
+        utt.lang = lang;
+        utt.rate = (ttsSpeed ?? 1) * 0.88; // scale: 1× = natural 0.88 rate
+        utt.pitch = pitch;
+
+        if (voice) utt.voice = voice;
+
+        utt.onend = speakNext;
+        utt.onerror = () => {
+          if (nativeRunIdRef.current !== runId) return;
+          setNativeSpeaking(false);
+        };
+
+        window.speechSynthesis.speak(utt);
+      };
+
+      speakNext();
     },
     [lang, pitch, ttsSpeed, voices, setNativeSpeaking]
   );
 
   const speak = useCallback(
-    (text, label = '') => {
-      if (ttsEngine === 'kokoro') return kokoro.speak(text, ttsSpeed ?? 1);
-      speakNative(text, label);
+    (textOrTexts, label = '') => {
+      const segments = normalizeSegments(textOrTexts);
+      if (!segments.length) return;
+
+      if (ttsEngine === 'kokoro') {
+        const payload = segments.length === 1 ? segments[0] : segments;
+        return kokoro.speak(payload, ttsSpeed ?? 1);
+      }
+
+      speakNative(segments, label);
     },
     [ttsEngine, ttsSpeed, kokoro, speakNative]
   );

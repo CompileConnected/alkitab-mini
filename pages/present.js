@@ -39,7 +39,7 @@ export default function PresentPage() {
     }
     const text =
       verses.length > 1
-        ? verses.map(({ verse: num, text }) => `${num}. ${text}`).join(' ')
+        ? verses.map(({ verse: num, text }) => `${num}. ${text}`)
         : verse;
     speak(text, reference);
   };

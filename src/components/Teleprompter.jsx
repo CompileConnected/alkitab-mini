@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTeleprompterStore, SIZE_STEPS } from '../stores/teleprompterStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import { TeleprompterTranslationSection } from './TranslationSection';
 import { SpeakButton } from './SpeakButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -45,6 +46,7 @@ export function Teleprompter({
   const vpp = useTeleprompterStore((s) => s.vpp);
   const vppUp = useTeleprompterStore((s) => s.vppUp);
   const vppDown = useTeleprompterStore((s) => s.vppDown);
+  const fontFamily = useSettingsStore((s) => s.fontFamily);
   const [page, setPage] = useState(0);
 
   const isSlideMode = Boolean(children);
@@ -152,6 +154,8 @@ export function Teleprompter({
   ]);
 
   const fontSize = SIZE_STEPS[sizeIdx];
+  const contentFontFamily =
+    fontFamily === 'serif' ? "'Playfair Display', serif" : 'Inter, sans-serif';
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
   const bgColor = bg ?? (isDark ? '#0d0d0d' : '#fafaf7');
@@ -292,7 +296,7 @@ export function Teleprompter({
                         className={`${textCls} leading-snug`}
                         style={{
                           fontSize,
-                          fontFamily: 'Inter, sans-serif',
+                          fontFamily: contentFontFamily,
                           fontWeight: 400,
                           letterSpacing: '0.01em',
                           lineHeight: 1.6,
@@ -308,7 +312,7 @@ export function Teleprompter({
                   className={`${textCls} text-center w-full leading-snug`}
                   style={{
                     fontSize,
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: contentFontFamily,
                     fontWeight: 400,
                     letterSpacing: '0.01em',
                     lineHeight: 1.6,
@@ -323,6 +327,7 @@ export function Teleprompter({
               <TeleprompterTranslationSection
                 pageText={pageText}
                 fontSize={fontSize}
+                fontFamily={contentFontFamily}
                 btnCls={btnCls}
                 selectBg={selectBg}
               />
@@ -385,7 +390,7 @@ export function Teleprompter({
                 className={`tracking-widest uppercase ${refCls} opacity-70`}
                 style={{
                   fontSize: Math.max(12, fontSize - 18),
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: contentFontFamily,
                 }}
               >
                 {reference}

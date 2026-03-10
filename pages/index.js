@@ -11,6 +11,7 @@ import { useSpeech } from '../src/hooks/useSpeech';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { CACHE_POLICIES } from '../src/lib/policy';
 
 const VerseAnimation = dynamic(
   () =>
@@ -73,9 +74,7 @@ export default function Home({ initialVerse }) {
         <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-orange-50/80 blur-[100px] animate-breathe delay-300" />
       </div>
 
-      {/* ── Layout ── */}
       <div className="min-h-screen flex flex-col items-center px-4 py-6 sm:py-10 gap-5 sm:gap-8 max-w-2xl mx-auto pb-28 sm:pb-10">
-        {/* ── Header ── */}
         <header className="w-full flex items-center justify-between animate-fade-up">
           <div className="flex flex-col items-start gap-1">
             <h1
@@ -88,6 +87,7 @@ export default function Home({ initialVerse }) {
               Verse of the Day
             </p>
           </div>
+
           <div className="flex items-center gap-2">
             <button
               onClick={() => setInfoOpen(true)}
@@ -112,14 +112,18 @@ export default function Home({ initialVerse }) {
           </div>
         </header>
 
-        {/* ── Verse Animation ── */}
+        <SearchForm
+          input={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={handleSearch}
+          loading={loading}
+        />
         {!isSearched && (
           <div className="w-full rounded-2xl shadow-lg overflow-hidden animate-fade-up delay-100">
             <VerseAnimation verseText={verse} reference={reference} />
           </div>
         )}
 
-        {/* ── Verse card ── */}
         <VerseCard
           reference={reference}
           loading={loading}
@@ -135,14 +139,6 @@ export default function Home({ initialVerse }) {
               `/present?passage=${encodeURIComponent(reference || 'votd')}`
             )
           }
-        />
-
-        {/* ── Search ── */}
-        <SearchForm
-          input={input}
-          onChange={(e) => setInput(e.target.value)}
-          onSubmit={handleSearch}
-          loading={loading}
         />
       </div>
 
@@ -161,14 +157,10 @@ export async function getStaticProps() {
     const initialVerse = await getVerseOfTheDay();
     return {
       props: { initialVerse },
-      revalidate: 43200, // regenerate at most twice per day
+      // Use the max-age defined in your central policy
+      revalidate: CACHE_POLICIES.BIBLE_VOTD.cdn_maxage,
     };
   } catch {
-    // If the upstream API is unavailable at build time, render without data
-    // and let the client-side fallback in useBible handle it.
-    return {
-      props: { initialVerse: null },
-      revalidate: 300, // retry in 5 min if upstream was down
-    };
+    return { props: { initialVerse: null }, revalidate: 300 };
   }
 }

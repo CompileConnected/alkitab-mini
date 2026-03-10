@@ -28,6 +28,8 @@ export default [
         ...globals.browser,
         ...globals.es2021,
         process: 'readonly',
+        path: 'readonly',
+        __dirname: 'readonly',
       },
     },
     plugins: {

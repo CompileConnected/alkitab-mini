@@ -8,6 +8,8 @@ import {
   faCircleQuestion,
   faSpinner,
   faTriangleExclamation,
+  faArrowUpRightFromSquare,
+  faHandHoldingHeart,
 } from '@fortawesome/free-solid-svg-icons';
 import Section from './Section';
 
@@ -30,6 +32,7 @@ const DEPS = [
     version: '^5.0.11',
     license: 'MIT',
     url: 'https://github.com/pmndrs/zustand',
+    donateUrl: 'https://github.com/sponsors/dai-shi',
   },
   {
     name: 'kokoro-js',
@@ -48,12 +51,27 @@ const DEPS = [
     version: '^4.3.6',
     license: 'MIT',
     url: 'https://animejs.com',
+    donateUrl: 'https://github.com/sponsors/juliangarnier',
+  },
+  {
+    name: 'core-js',
+    version: '^3.48.0',
+    license: 'MIT',
+    url: 'https://core-js.io/',
+    donateUrl: 'https://opencollective.com/core-js',
+  },
+  {
+    name: 'regenerator-runtime',
+    version: '^0.14.1',
+    license: 'MIT',
+    url: 'https://github.com/facebook/regenerator/tree/main#readme',
   },
   {
     name: 'Tailwind CSS',
     version: '^4.2.1',
     license: 'MIT',
     url: 'https://tailwindcss.com',
+    donateUrl: 'https://tailwindcss.com/sponsor',
   },
   {
     name: 'Font Awesome (core)',
@@ -68,10 +86,31 @@ const DEPS = [
     url: 'https://fontawesome.com',
   },
   {
+    name: '@fortawesome/react-fontawesome',
+    version: '^3.2.0',
+    license: 'MIT',
+    url: 'https://fontawesome.com/docs/web/use-with/react',
+  },
+  {
     name: 'PostCSS',
     version: '^8.5.8',
     license: 'MIT',
     url: 'https://postcss.org',
+    donateUrl: 'https://opencollective.com/postcss',
+  },
+  {
+    name: 'Autoprefixer',
+    version: '^10.4.27',
+    license: 'MIT',
+    url: 'https://github.com/postcss/autoprefixer',
+    donateUrl: 'https://opencollective.com/postcss',
+  },
+  {
+    name: 'Browserslist',
+    version: 'latest',
+    license: 'MIT',
+    url: 'https://browsersl.ist/',
+    donateUrl: 'https://opencollective.com/browserslist',
   },
   {
     name: 'path-browserify',
@@ -80,6 +119,9 @@ const DEPS = [
     url: 'https://github.com/browserify/path-browserify',
   },
 ];
+
+const SUPPORT_URL =
+  process.env.NEXT_PUBLIC_SUPPORT_URL || 'https://forms.gle/kko8Y8seE3akUupb8';
 
 // ── Feature definitions ───────────────────────────────────────────────────────
 function useFeatures() {
@@ -211,12 +253,12 @@ export function InfoModal({ open, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100]"
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 pointer-events-none">
+      <div className="fixed bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-[110] pointer-events-none">
         <div className="pointer-events-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-lg max-h-[85vh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -288,31 +330,78 @@ export function InfoModal({ open, onClose }) {
             </div>
           </Section>
 
+          <Section title="Support">
+            <a
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:border-amber-200 hover:bg-amber-50/40 transition-colors"
+            >
+              <span className="text-sm text-gray-700">
+                Need help or want to report a bug?
+              </span>
+              <span className="text-xs font-medium text-amber-700">
+                Open support
+              </span>
+            </a>
+          </Section>
+
           {/* ── Dependencies ── */}
           <Section title="Open Source Libraries">
             <div className="flex flex-col gap-1.5">
               {DEPS.map((dep) => (
-                <a
+                <div
                   key={dep.name}
-                  href={dep.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:border-amber-200 hover:bg-amber-50/40 transition-colors group"
+                  className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5"
                 >
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                      {dep.name}
-                    </span>
-                    <span className="text-xs text-gray-400 ml-2">
-                      {dep.version}
-                    </span>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <a
+                        href={dep.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-800 hover:text-amber-700 transition-colors"
+                      >
+                        {dep.name}
+                        <FontAwesomeIcon
+                          icon={faArrowUpRightFromSquare}
+                          className="text-[10px] opacity-60"
+                        />
+                      </a>
+                      <span className="text-xs text-gray-400 ml-2">
+                        {dep.version}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      {dep.donateUrl && (
+                        <a
+                          href={dep.donateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
+                        >
+                          <FontAwesomeIcon
+                            icon={faHandHoldingHeart}
+                            className="text-[10px]"
+                          />
+                          Donate
+                        </a>
+                      )}
+
+                      {dep.scope && (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0 bg-slate-50 text-slate-600 border-slate-200">
+                          {dep.scope}
+                        </span>
+                      )}
+
+                      <span
+                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0 ${licenseColor(dep.license)}`}
+                      >
+                        {dep.license}
+                      </span>
+                    </div>
                   </div>
-                  <span
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0 ${licenseColor(dep.license)}`}
-                  >
-                    {dep.license}
-                  </span>
-                </a>
+                </div>
               ))}
             </div>
             <p className="text-[10px] text-gray-400 mt-3 text-center">

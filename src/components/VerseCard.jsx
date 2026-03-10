@@ -8,6 +8,14 @@ import {
   faCopy,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
+import { useSettingsStore } from '../stores/settingsStore';
+
+const FONT_SIZE_MAP = {
+  sm: 16,
+  md: 18,
+  lg: 21,
+  xl: 24,
+};
 
 export function VerseCard({
   reference,
@@ -21,6 +29,12 @@ export function VerseCard({
   copied,
   onPresent,
 }) {
+  const fontFamily = useSettingsStore((s) => s.fontFamily);
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const contentFontFamily =
+    fontFamily === 'serif' ? "'Playfair Display', serif" : 'Inter, sans-serif';
+  const contentFontSize = FONT_SIZE_MAP[fontSize] ?? FONT_SIZE_MAP.md;
+
   const verseText =
     verses.length > 1
       ? verses.map(({ verse: n, text }) => `${n} ${text}`).join('\n')
@@ -72,21 +86,30 @@ export function VerseCard({
           Loading verse…
         </p>
       ) : verses.length > 1 ? (
-        <ol className="flex flex-col gap-2 text-gray-800 text-sm leading-relaxed list-none">
+        <ol
+          className="flex flex-col gap-2 text-gray-800 leading-relaxed list-none"
+          style={{
+            fontSize: Math.max(14, contentFontSize - 2),
+          }}
+        >
           {verses.map(({ verse: num, text }) => (
             <li key={num} className="flex gap-2">
-              <span className="text-amber-600 font-bold text-xs mt-0.5 min-w-[1.5rem]">
+              <span
+                className="text-amber-600 font-bold mt-0.5 min-w-[1.5rem]"
+                style={{ fontSize: Math.max(12, contentFontSize - 7) }}
+              >
                 {num}
               </span>
-              <span>{text}</span>
+              <span style={{ fontFamily: contentFontFamily }}>{text}</span>
             </li>
           ))}
         </ol>
       ) : (
         <p
-          className="text-gray-800 leading-relaxed text-base text-center min-h-[56px]"
+          className="text-gray-800 leading-relaxed text-center min-h-[56px]"
           style={{
-            fontFamily: 'Inter, sans-serif',
+            fontSize: contentFontSize,
+            fontFamily: contentFontFamily,
             letterSpacing: '0.01em',
             lineHeight: 1.75,
           }}

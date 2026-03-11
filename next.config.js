@@ -30,6 +30,22 @@ const nextConfig = {
     return config;
   },
 
+  // Skip linting during build — run lint separately in CI
+  eslint: { ignoreDuringBuilds: true },
+
+  // Tree-shake barrel exports for heavy icon/UI packages
+  optimizePackageImports: [
+    '@fortawesome/free-solid-svg-icons',
+    '@fortawesome/react-fontawesome',
+    '@fortawesome/fontawesome-svg-core',
+    'zustand',
+  ],
+
+  // Parallelize webpack compilation
+  experimental: {
+    webpackBuildWorker: true,
+  },
+
   // Local dev only — production headers are in vercel.json
   async headers() {
     return [
@@ -45,7 +61,7 @@ const nextConfig = {
   },
 };
 
-// Initialize the bundle analyzer with your config
+// Bundle analyzer only when explicitly requested
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });

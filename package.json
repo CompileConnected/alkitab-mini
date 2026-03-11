@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "yarn build:sw && next build",
+    "build": "yarn build:sw && next build --turbopack",
     "build:sw": "esbuild src/service-worker/sw.js --bundle --outfile=public/sw.js --minify --target=es2015",
     "start": "next start",
     "analyze": "ANALYZE=true yarn build --webpack",

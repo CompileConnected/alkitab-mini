@@ -9,6 +9,7 @@ import { KokoroProvider } from '../src/context/KokoroContext';
 import { SettingsModal } from '../src/components/SettingsModal';
 import { useWebFeaturesStore } from '../src/stores/webFeaturesStore';
 import { useSpeechStore } from '../src/stores/speechStore';
+import { Analytics } from '@vercel/analytics/next';
 
 config.autoAddCss = false;
 
@@ -34,6 +35,7 @@ export default function MyApp({ Component, pageProps }) {
     <KokoroProvider>
       <Component {...pageProps} />
       <SettingsModal />
+      <Analytics />
     </KokoroProvider>
   );
 }

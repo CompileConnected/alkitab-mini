@@ -30,20 +30,14 @@ const nextConfig = {
     return config;
   },
 
-  // Skip linting during build — run lint separately in CI
-  eslint: { ignoreDuringBuilds: true },
-
-  // Tree-shake barrel exports for heavy icon/UI packages
-  optimizePackageImports: [
-    '@fortawesome/free-solid-svg-icons',
-    '@fortawesome/react-fontawesome',
-    '@fortawesome/fontawesome-svg-core',
-    'zustand',
-  ],
-
   // Parallelize webpack compilation
   experimental: {
     webpackBuildWorker: true,
+    optimizePackageImports: [
+      '@fortawesome/free-solid-svg-icons',
+      '@fortawesome/react-fontawesome',
+      '@fortawesome/fontawesome-svg-core',
+    ],
   },
 
   // Local dev only — production headers are in vercel.json

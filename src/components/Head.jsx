@@ -2,7 +2,7 @@ import NextHead from 'next/head';
 
 const defaultDescription = 'Alkitab Mini — daily Bible verse reader';
 const defaultOGURL = '';
-const defaultOGImage = '';
+const defaultOGImage = '/android-chrome-512x512.png';
 
 const Head = (props) => (
   <NextHead>
@@ -19,6 +19,9 @@ const Head = (props) => (
       content="width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover"
     />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 
     {/* Open Graph */}
     <meta property="og:url" content={props.url || defaultOGURL} />
@@ -52,6 +55,10 @@ const Head = (props) => (
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="msapplication-navbutton-color" content="white" />
     <meta name="msapplication-TileColor" content="white" />
+    <meta
+      name="msapplication-TileImage"
+      content="/android-chrome-192x192.png"
+    />
     <meta name="application-name" content={props.title || 'Alkitab Mini'} />
     <meta name="screen-orientation" content="portrait" />
     <meta name="full-screen" content="yes" />

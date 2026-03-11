@@ -8,8 +8,15 @@ import { withDevtools } from './withDevtools';
 
 // ── Synchronous capability detection ─────────────────────────────────────────
 // Evaluated once at module load. Safe for SSR (guarded by typeof checks).
-const _webgpu = typeof navigator !== 'undefined' && !!navigator.gpu;
-const _wasm = typeof WebAssembly !== 'undefined';
+const _isMobile =
+  typeof navigator !== 'undefined' &&
+  (navigator.userAgentData?.mobile ||
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+const _webgpu =
+  typeof navigator !== 'undefined' && !!navigator.gpu && !_isMobile;
+const _wasm = typeof WebAssembly !== 'undefined' && !_isMobile;
 const _speechSynthesis =
   typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -17,8 +24,9 @@ const _speechSynthesis =
  * webFeaturesStore — single source of truth for browser web-feature availability.
  *
  * Covers:
- *   • webgpu          — WebGPU (used by Kokoro AI, WebGL, etc.)
- *   • wasm            — WebAssembly (used by Kokoro AI wasm backend)
+ *   • isMobile        — True if the user is on a mobile device (used to gate expensive features)
+ *   • webgpu          — WebGPU (disabled on mobile)
+ *   • wasm            — WebAssembly (disabled on mobile)
  *   • speechSynthesis — Web Speech API / native TTS
  *   • geminiNano      — Chrome Built-in AI / Gemini Nano (Prompt API, Chrome 127+)
  *   • translationApi  — Chrome Translation API (Chrome 138+)
@@ -32,6 +40,7 @@ export const useWebFeaturesStore = create(
   withDevtools(
     (set) => ({
       // ── Sync flags (reliable immediately, no async needed) ──────────────────
+      isMobile: _isMobile,
       webgpu: _webgpu,
       wasm: _wasm,
       speechSynthesis: _speechSynthesis,

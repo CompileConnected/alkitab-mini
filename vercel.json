@@ -30,11 +30,19 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "accelerometer=(), autoplay=(), camera=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+          "value": "accelerometer=(), autoplay=(), bluetooth=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(self), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), screen-wake-lock=(self), serial=(), usb=(), web-share=(self), xr-spatial-tracking=(), cross-origin-isolated=(self), translator=(self), summarizer=(self)"
         },
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://vercel.live https://*.vercel.live https://cdn.jsdelivr.net; connect-src 'self' https://huggingface.co https://*.huggingface.co https://xethub.hf.co https://*.xethub.hf.co https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self'; frame-src 'self' https://vercel.live https://*.vercel.live; img-src 'self' data:; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
         }
       ]
     }

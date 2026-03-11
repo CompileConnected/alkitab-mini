@@ -18,6 +18,16 @@ export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
     useWebFeaturesStore.getState().check();
     useSpeechStore.getState().initVoices();
+
+    // Register service worker for PWA and caching
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((reg) => console.log('SW registered:', reg.scope))
+          .catch((err) => console.error('SW registration failed:', err));
+      });
+    }
   }, []);
 
   return (

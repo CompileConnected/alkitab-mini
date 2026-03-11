@@ -29,6 +29,29 @@ const nextConfig = {
     }
     return config;
   },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Permissions-Policy',
+            value:
+              'accelerometer=(), autoplay=(), bluetooth=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(self), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), screen-wake-lock=(self), serial=(), usb=(), web-share=(self), xr-spatial-tracking=(), cross-origin-isolated=(self), translator=(self), summarizer=(self)',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 // Initialize the bundle analyzer with your config

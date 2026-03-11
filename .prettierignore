@@ -8,7 +8,7 @@ node_modules
 
 # Ignore lock files (don't format these!)
 package-lock.json
-yarn.lock
+pnpm.lock
 
 # Ignore images and assets
 public/assets

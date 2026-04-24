@@ -30,7 +30,7 @@
     "core-js": "^3.49.0",
     "kokoro-js": "^1.2.1",
     "next": "latest",
-    "postcss": "^8.5.8",
+    "postcss": "^8.5.10",
     "react": "latest",
     "react-dom": "latest",
     "regenerator-runtime": "^0.14.1",
